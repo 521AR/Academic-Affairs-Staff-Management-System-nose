@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生档案信息管理</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background-color: #ffffff;
+            color: #334155;
+            padding: 20px;
+        }
+        /* 顶部功能杠 */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .search-group { display: flex; gap: 10px; }
+
+        /* 表单核心控件通用样式 */
+        input, select {
+            padding: 9px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #334155;
+            outline: none;
+            transition: all 0.25s;
+        }
+        input:focus, select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        /* 现代高质感按钮系统 */
+        button {
+            padding: 9px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-primary { background-color: #3b82f6; color: white; }
+        .btn-primary:hover { background-color: #2563eb; }
+        .btn-outline { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .btn-outline:hover { background-color: #e2e8f0; }
+        .btn-danger { background-color: #ef4444; color: white; padding: 5px 10px; font-size: 12px; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-edit { background-color: #10b981; color: white; padding: 5px 10px; font-size: 12px; margin-right: 6px; }
+        .btn-edit:hover { background-color: #059669; }
+
+        /* 高级响应式纯CSS数据表格 */
+        .table-wrapper { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 14px; font-size: 14px; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f8fafc; color: #64748b; font-weight: 600; }
+        tr:hover { background-color: #f8fafc; transition: background-color 0.2s; }
+
+        /* Vue纯净动态模态框 */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center; z-index: 2000;
+        }
+        .modal-body {
+            background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .modal-title { font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 20px; }
+        .form-row { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+        .form-row label { font-size: 13px; font-weight: 500; color: #475569; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+
+        /* 模态框弹性过渡 */
+        .pop-enter-active, .pop-leave-active { transition: all 0.3s ease; }
+        .pop-enter, .pop-leave-to { opacity: 0; }
+        .pop-enter .modal-body, .pop-leave-to .modal-body { transform: scale(0.95) translateY(-10px); }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="action-bar">
+        <button class="btn-primary" @click="openModal(false)">➕ 添加新学生</button>
+        <div class="search-group">
+            <input type="text" v-model.trim="searchKeyword" placeholder="输入学生编号精确搜索">
+            <button class="btn-primary" @click="handleSearch">搜索</button>
+            <button class="btn-outline" @click="resetSearch">重置</button>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+            <tr>
+                <th>学生编号</th>
+                <th>学生姓名</th>
+                <th>性别</th>
+                <th>联系电话</th>
+                <th>所属学院</th>
+                <th>攻读专业</th>
+                <th style="text-align: center;">操作维护</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="stu in students" :key="stu.studentId">
+                <td>{{ stu.studentId }}</td>
+                <td>{{ stu.studentname }}</td>
+                <td>{{ stu.gender }}</td>
+                <td>{{ stu.phone }}</td>
+                <td>{{ stu.collegename }}</td>
+                <td>{{ stu.professionName }}</td>
+                <td style="text-align: center;">
+                    <button class="btn-edit" @click="openModal(true, stu)">编辑</button>
+                    <button class="btn-danger" @click="handleDelete(stu.studentId)">删除</button>
+                </td>
+            </tr>
+            <tr v-if="students.length === 0">
+                <td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;">🔍 暂未检索到任何学生档案数据</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <transition name="pop">
+        <div class="modal-overlay" v-if="dialogVisible">
+            <div class="modal-body">
+                <div class="modal-title">{{ isEdit ? '编辑学生档案' : '录入新学生信息' }}</div>
+
+                <div class="form-row">
+                    <label>学生学号 (编号)</label>
+                    <input type="text" v-model="form.studentId" :disabled="isEdit" placeholder="一经录入不可随意变更">
+                </div>
+                <div class="form-row">
+                    <label>真实姓名</label>
+                    <input type="text" v-model="form.studentname" placeholder="请输入学生姓名">
+                </div>
+                <div class="form-row">
+                    <label>性别</label>
+                    <select v-model="form.gender">
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>移动电话</label>
+                    <input type="text" v-model="form.phone" placeholder="请输入有效联系方式">
+                </div>
+                <div class="form-row">
+                    <label>所在学院</label>
+                    <select v-model="selectedCollegeCode" @change="onCollegeChange">
+                        <option value="">-- 请选择关联学院 --</option>
+                        <option v-for="c in colleges" :key="c.code" :value="c.code">{{ c.collegename }}</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>报读专业</label>
+                    <select v-model="selectedProfessionId">
+                        <option value="">-- 请选择对应专业 --</option>
+                        <option v-for="p in professions" :key="p.id" :value="p.id">{{ p.professionName }}</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-outline" @click="dialogVisible = false">取消</button>
+                    <button class="btn-primary" @click="handleSubmit">保存提交</button>
+                </div>
+            </div>
+        </div>
+    </transition>
+</div>
+
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            API_BASE: 'http://localhost:8080/students',
+            students: [],
+            colleges: [],
+            professions: [],
+            searchKeyword: '',
+            dialogVisible: false,
+            isEdit: false,
+            // 联动选择临时中转域
+            selectedCollegeCode: '',
+            selectedProfessionId: '',
+            form: { studentId: '', studentname: '', gender: '男', phone: '', collegename: '', professionName: '' }
+        },
+        computed: {
+            token() { return localStorage.getItem('jwt_token'); }
+        },
+        methods: {
+            getHeaders() { return { 'Authorization': 'Bearer ' + this.token }; },
+            loadAllData() {
+                axios.get(`${this.API_BASE}/getAllWithCollegeInfo`, { headers: this.getHeaders() })
+                    .then(res => this.students = res.data || [])
+                    .catch(() => alert('鉴权失败或服务异常，拉取名册失败'));
+            },
+            loadColleges() {
+                return axios.get(`${this.API_BASE}/getAllColleges`, { headers: this.getHeaders() })
+                    .then(res => this.colleges = res.data || []);
+            },
+            onCollegeChange() {
+                this.selectedProfessionId = '';
+                this.professions = [];
+                if (!this.selectedCollegeCode) return;
+                axios.get(`${this.API_BASE}/professions/${this.selectedCollegeCode}`, { headers: this.getHeaders() })
+                    .then(res => this.professions = res.data || []);
+            },
+            openModal(editMode, target = null) {
+                this.isEdit = editMode;
+                this.loadColleges().then(() => {
+                    if (editMode && target) {
+                        this.form = { ...target };
+                        // 反向锁定学院和专业下拉
+                        const matchedColl = this.colleges.find(c => c.collegename === target.collegename);
+                        if (matchedColl) {
+                            this.selectedCollegeCode = matchedColl.code;
+                            axios.get(`${this.API_BASE}/professions/${this.selectedCollegeCode}`, { headers: this.getHeaders() })
+                                .then(res => {
+                                    this.professions = res.data || [];
+                                    const matchedProf = this.professions.find(p => p.professionName === target.professionName);
+                                    if (matchedProf) this.selectedProfessionId = matchedProf.id;
+                                });
+                        }
+                    } else {
+                        this.form = { studentId: '', studentname: '', gender: '男', phone: '', collegename: '', professionName: '' };
+                        this.selectedCollegeCode = '';
+                        this.selectedProfessionId = '';
+                        this.professions = [];
+                    }
+                    this.dialogVisible = true;
+                });
+            },
+            handleSubmit() {
+                const targetColl = this.colleges.find(c => c.code === this.selectedCollegeCode);
+                const targetProf = this.professions.find(p => p.id === this.selectedProfessionId);
+
+                if (!this.form.studentId || !this.form.studentname || !targetColl || !targetProf) {
+                    alert('请确认所有表单项均已填写选择完毕'); return;
+                }
+
+                this.form.collegename = targetColl.collegename;
+                this.form.professionName = targetProf.professionName;
+
+                if (this.isEdit) {
+                    axios.put(`${this.API_BASE}/update/${this.form.studentId}`, this.form, { headers: this.getHeaders() })
+                        .then(() => { this.dialogVisible = false; this.loadAllData(); });
+                } else {
+                    axios.post(`${this.API_BASE}/insert`, this.form, { headers: this.getHeaders() })
+                        .then(() => { this.dialogVisible = false; this.loadAllData(); });
+                }
+            },
+            handleDelete(id) {
+                if (!confirm('确定要永久抹除该学生的在籍档案吗？')) return;
+                axios.delete(`${this.API_BASE}/delete/${id}`, { headers: this.getHeaders() })
+                    .then(() => this.loadAllData());
+            },
+            handleSearch() {
+                if (!this.searchKeyword) { this.loadAllData(); return; }
+                axios.get(`${this.API_BASE}/getById/${this.searchKeyword}`, { headers: this.getHeaders() })
+                    .then(res => this.students = res.data ? (Array.isArray(res.data) ? res.data : [res.data]) : [])
+                    .catch(() => this.students = []);
+            },
+            resetSearch() { this.searchKeyword = ''; this.loadAllData(); }
+        },
+        mounted() { this.loadAllData(); }
+    });
+</script>
+</body>
+</html>

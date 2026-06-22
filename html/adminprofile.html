@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>个人中心</title>
+    <link rel="stylesheet" href="../css/profile.css" />
+</head>
+<body>
+<div id="app">
+    <div class="container">
+        <div class="topbar">
+            <div class="brand">
+                <div id="avatar" class="avatar">A</div>
+                <h1 class="title">管理员中心</h1>
+            </div>
+            <div class="nav">
+                <a href="javascript:void(0)" @click="goindex">首页</a>
+                <a href="javascript:void(0)" @click="goHomePage1">登录</a>
+                <a href="javascript:void(0)" @click="goRegister1">注册</a>
+                <a href="javascript:void(0)" @click="logout1">退出</a>
+            </div>
+        </div>
+
+        <div class="grid">
+            <section class="card">
+                <h2>管理员信息</h2>
+                <table class="user-table" id="userInfoTable">
+                    <thead>
+                    <tr>
+                        <th>字段</th>
+                        <th>值</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>用户名</td>
+                        <td id="username">-</td>
+                    </tr>
+                    <tr>
+                        <td>密码</td>
+                        <td id="password">-</td>
+                    </tr>
+                    <tr>
+                        <td>角色</td>
+                        <td id="role"><span class="badge">admin</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="spacer"></div>
+                <div class="row">
+                    <button class="btn-outline" id="refresh">刷新</button>
+                </div>
+            </section>
+
+            <aside class="card">
+                <h2>系统状态</h2>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="muted">安全等级</div>
+                        <div class="num ok" id="securityLevel">高</div>
+                    </div>
+                    <div class="stat">
+                        <div class="muted">最近登录</div>
+                        <div class="num" id="lastLogin">-</div>
+                    </div>
+                    <div class="stat">
+                        <div class="muted">系统消息</div>
+                        <div class="num warn" id="unread">0</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <div class="spacer"></div>
+
+        <section class="card">
+            <h2>系统活动</h2>
+            <table class="table" id="activity">
+                <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>事件</th>
+                    <th>状态</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div id="emptyActivity" class="empty" style="display:none;">暂无活动</div>
+        </section>
+    </div>
+</div>
+
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            adminInfo: null,
+            host: 'http://127.0.0.1:8080'
+        },
+        methods: {
+            async fetchAdminInfo() {
+                try {
+                    // 获取当前登录用户的token
+                    const token = localStorage.getItem('jwt_token');
+                    if (!token) {
+                        alert('请先登录');
+                        window.location.href = 'UserLogin.html';
+                        return;
+                    }
+
+                    // 获取管理员信息的接口（需要后端提供）
+                    // 这里我们模拟直接使用配置文件中的信息
+                    this.adminInfo = {
+                        username: 'admin', // 这应该从后端获取
+                        password: '••••••', // 出于安全考虑，不应显示真实密码
+                        role: 'admin'
+                    };
+
+                    // 更新UI
+                    this.updateAdminInfo();
+                    this.populateStats();
+                    this.populateActivity();
+                } catch (error) {
+                    console.error('获取管理员信息失败:', error);
+                    // 使用默认值
+                    this.adminInfo = {
+                        username: 'admin',
+                        password: '••••••',
+                        role: 'admin'
+                    };
+                    this.updateAdminInfo();
+                }
+            },
+            updateAdminInfo() {
+                if (!this.adminInfo) return;
+
+                document.getElementById('username').textContent = this.adminInfo.username || '-';
+                document.getElementById('password').textContent = this.adminInfo.password || '-';
+                document.getElementById('role').innerHTML = `<span class="badge">${this.adminInfo.role || 'admin'}</span>`;
+
+                // 设置头像
+                document.getElementById('avatar').textContent = 'A';
+
+                // 管理员不可编辑个人信息
+                const editButton = document.getElementById('edit');
+                if (editButton) {
+                    editButton.style.display = 'none';
+                }
+            },
+            populateStats() {
+                const last = localStorage.getItem('demo_last_login') || new Date().toLocaleString();
+                document.getElementById('lastLogin').textContent = last;
+                document.getElementById('unread').textContent = String(Math.floor(Math.random() * 3));
+                document.getElementById('securityLevel').textContent = '高';
+            },
+            populateActivity() {
+                const tbody = document.querySelector('#activity tbody');
+                tbody.innerHTML = '';
+                const items = [
+                    { time: new Date().toLocaleString(), event: '管理员登录', status: '成功', level: 'ok' },
+                    { time: new Date(Date.now()-3600e3).toLocaleString(), event: '系统配置更新', status: '成功', level: 'ok' },
+                    { time: new Date(Date.now()-86400e3).toLocaleString(), event: '用户权限管理', status: '完成', level: 'ok' }
+                ];
+                if (!items.length) {
+                    document.getElementById('emptyActivity').style.display = 'block';
+                    return;
+                }
+                document.getElementById('emptyActivity').style.display = 'none';
+                for (const it of items) {
+                    const tr = document.createElement('tr');
+                    const td1 = document.createElement('td'); td1.textContent = it.time;
+                    const td2 = document.createElement('td'); td2.textContent = it.event;
+                    const td3 = document.createElement('td'); td3.innerHTML = `<span class="${it.level}">${it.status}</span>`;
+                    tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+                    tbody.appendChild(tr);
+                }
+            },
+            goHomePage1: function() {
+                window.location.href = 'homePage.html';
+            },
+            goRegister1:function () {
+                window.location.href = 'register.html';
+            },
+            logout1:function () {
+                // 清除本地存储的token和其他用户信息
+                localStorage.removeItem('jwt_token');
+                localStorage.removeItem('username');
+                localStorage.removeItem('role');
+                localStorage.removeItem('nickname');
+
+                // 跳转到homePage.html
+                window.location.href = 'homePage.html';
+            },
+            goindex:function () {
+                window.location.href = 'index.html';
+            },
+        },
+        mounted() {
+            // 页面加载时获取管理员信息
+            this.fetchAdminInfo();
+
+            // 绑定事件监听器
+            document.getElementById('refresh').addEventListener('click', () => {
+                this.fetchAdminInfo();
+            });
+
+            // 点击模态框外部关闭（保留以防有模态框相关代码）
+            window.addEventListener('click', (event) => {
+                const modal = document.getElementById('editModal');
+                if (modal && event.target === modal) {
+                    // this.closeEditModal(); // 如果有模态框的话
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>艺术学院 - 灵动美学空间</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior: smooth; }
+    body { font-family: "Georgia", "Pinsheng", "Microsoft YaHei", serif; background: #0b070f !important; color: #f3f4f6; overflow-x: hidden; }
+    #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+    .container { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; padding: 80px 50px 80px 20px; }
+
+    /* 侧边栏控制台：艺术霓虹定制 */
+    .sidebar-dock {
+      position: fixed; right: 25px; top: 50%; transform: translateY(-50%);
+      background: rgba(24, 14, 36, 0.75); border: 1px solid rgba(190, 24, 93, 0.4);
+      backdrop-filter: blur(16px); padding: 20px 10px; border-radius: 30px;
+      display: flex; flex-direction: column; gap: 20px; z-index: 999;
+      box-shadow: 0 0 30px rgba(190, 24, 93, 0.2); transition: all 0.4s;
+    }
+    .sidebar-dock:hover { border-color: rgba(219, 39, 119, 0.7); box-shadow: 0 0 40px rgba(219, 39, 119, 0.3); }
+    .dock-item {
+      width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,0.03);
+      display: flex; align-items: center; justify-content: center; color: #a1a1aa;
+      text-decoration: none; font-size: 1.2rem; transition: all 0.3s; position: relative;
+    }
+    .dock-item span {
+      position: absolute; right: 60px; background: #1c102b; color: #fbcfe8;
+      padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+      white-space: nowrap; opacity: 0; pointer-events: none; transform: translateX(10px); transition: all 0.3s;
+      border: 1px solid rgba(190, 24, 93, 0.3); box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .dock-item:hover span { opacity: 1; transform: translateX(0); }
+    .dock-item:hover { background: rgba(190, 24, 93, 0.2); color: #db2777; transform: scale(1.1); }
+
+    /* 返回全局门户：艺术呼吸特效 */
+    .dock-item.global-btn {
+      background: linear-gradient(135deg, #be185d, #db2777); color: #ffffff !important;
+      box-shadow: 0 0 15px #be185d, inset 0 0 10px rgba(255,255,255,0.4);
+      animation: artPulse 2.5s infinite;
+    }
+    .dock-item.global-btn span { background: #14051c; color: #db2777; border-color: #db2777; }
+    @keyframes artPulse {
+      0% { box-shadow: 0 0 12px #be185d; transform: scale(1); }
+      50% { box-shadow: 0 0 25px #ec4899, 0 0 10px #be185d; transform: scale(1.08); }
+      100% { box-shadow: 0 0 12px #be185d; transform: scale(1); }
+    }
+
+    .header-title { text-align: center; font-size: 4rem; font-weight: 700; margin-bottom: 50px; background: linear-gradient(to right, #fbcfe8, #db2777, #be185d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 6px; }
+    .intro-card { background: rgba(255,255,255,0.02); padding: 40px; border-radius: 24px; border: 1px solid rgba(190, 24, 93, 0.15); margin-bottom: 50px; line-height: 1.9; font-size: 1.15rem; text-align: justify; backdrop-filter: blur(12px); box-shadow: inset 0 0 30px rgba(190, 24, 93, 0.05); }
+    .section-title { font-size: 2.5rem; color: #db2777; margin-bottom: 35px; font-weight: 600; display: inline-block; position: relative; }
+    .section-title::after { content:''; position: absolute; bottom: -8px; left: 0; width: 50px; height: 3px; background: #be185d; }
+
+    /* 美学矩阵折叠项 */
+    .dept-item-box { background: rgba(255,255,255,0.01); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); padding: 30px; margin-bottom: 25px; transition: all 0.35s; cursor: pointer; backdrop-filter: blur(4px); }
+    .dept-item-box:hover { border-color: rgba(190, 24, 93, 0.4); background: rgba(190, 24, 93, 0.02); transform: translateY(-3px); }
+    .dept-top { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; color: #db2777; font-size: 1.5rem; }
+    .dept-det { font-size: 1rem; line-height: 1.8; color: #d1d5db; padding-top: 20px; border-top: 1px dashed rgba(190, 24, 93, 0.2); animation: fadeIn 0.4s ease; }
+    .dept-det ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    .dept-det li { background: rgba(190, 24, 93, 0.15); border: 1px solid rgba(190, 24, 93, 0.3); padding: 4px 12px; border-radius: 6px; font-size: 0.88rem; color: #fbcfe8; }
+
+    /* 设施网格 */
+    .architecture-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 40px; margin-top: 40px; margin-bottom: 80px; }
+    .building-card { position: relative; border-radius: 20px; overflow: hidden; height: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); cursor: pointer; border: 1px solid rgba(255,255,255,0.05); }
+    .building-img { width: 100%; height: 100%; background-size: cover; background-position: center; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+    .building-info { position: absolute; bottom: -100%; left: 0; width: 100%; padding: 30px; background: rgba(15, 7, 23, 0.85); backdrop-filter: blur(20px); border-top: 1px solid rgba(190, 24, 93, 0.3); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
+    .building-card:hover .building-img { transform: scale(1.08); }
+    .building-card:hover .building-info { bottom: 0; }
+    .building-info h3 { font-size: 1.4rem; color: #db2777; margin-bottom: 12px; }
+
+    /* 公共学术站点 */
+    .academic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; margin-bottom: 80px; }
+    .academic-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 30px; text-align: center; text-decoration: none; color: inherit; transition: all 0.35s; }
+    .academic-card:hover { border-color: #db2777; background: rgba(190,24,93,0.04); transform: scale(1.05); box-shadow: 0 10px 25px rgba(190,24,93,0.15); }
+    .academic-card i { font-size: 2.5rem; color: #db2777; margin-bottom: 15px; }
+
+    /* 编年史卷线 */
+    .horizontal-scroll { display: flex; overflow-x: auto; padding: 40px 20px; gap: 60px; scroll-behavior: smooth; border-bottom: 2px solid rgba(190, 24, 93, 0.2); }
+    .horizontal-scroll::-webkit-scrollbar { height: 6px; }
+    .horizontal-scroll::-webkit-scrollbar-thumb { background: rgba(190, 24, 93, 0.4); border-radius: 3px; }
+    .timeline-node { flex: 0 0 300px; text-align: left; }
+    .year-indicator { font-size: 3.5rem; font-weight: 300; color: #db2777; display: inline-block; transition: transform 0.2s ease; transform-origin: left bottom; text-shadow: 0 0 20px rgba(190,24,93,0.3); }
+
+    /* 数据统计 */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px; margin-bottom: 80px; }
+    .stat-card { background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); padding: 40px 30px; border-radius: 20px; text-align: center; backdrop-filter: blur(4px); }
+    .stat-number { font-size: 3.8rem; font-weight: 700; color: #db2777; margin-bottom: 10px; text-shadow: 0 0 20px rgba(190,24,93,0.3); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    footer { text-align: center; padding: 60px 0 40px; color: #4b5563; font-size: 0.95rem; border-top: 1px solid rgba(255,255,255,0.02); }
+  </style>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+
+<nav class="sidebar-dock">
+  <a href="../index.html" class="dock-item global-btn" title="返回全局门户"><i class="fas fa-globe"></i><span>返回全局门户</span></a>
+  <a href="#intro" class="dock-item" title="学院简介"><i class="fas fa-university"></i><span>学院简介</span></a>
+  <a href="#matrix" class="dock-item" title="美学矩阵"><i class="fas fa-palette"></i><span>美学矩阵</span></a>
+  <a href="#facilities" class="dock-item" title="教学设施"><i class="fas fa-cubes"></i><span>教学设施</span></a>
+  <a href="#academic" class="dock-item" title="学术公共导航"><i class="fas fa-flask"></i><span>学术公共导航</span></a>
+  <a href="#timeline" class="dock-item" title="美学编年史"><i class="fas fa-history"></i><span>美学编年史</span></a>
+  <a href="#dashboard" class="dock-item" title="办学成果"><i class="fas fa-chart-line"></i><span>办学成果指标</span></a>
+</nav>
+
+<div id="app" class="container">
+  <h1 class="header-title" id="intro">{{ collegeData.name }}</h1>
+
+  <div class="intro-card">
+    <p>艺术学院成立于2005年，致力于在全球化数字浪潮中构筑具有鲜明时代特色的现代美学育人体系。学院不仅深耕声乐演奏、传统美术等纯艺术经典领域，更全面对接现代数字媒体、人机交互动画等前沿文创产业。学院配备有行业顶尖的高精度数字音频工坊、动作捕捉实验室，以深厚的美学功底赋能交叉学科实践，全力培养引领未来灵动空间的综合艺术英才。</p>
+  </div>
+
+  <div style="margin-bottom: 60px;" id="matrix">
+    <h2 class="section-title"><i class="fas fa-bezier-curve"></i> 美学矩阵结构</h2>
+    <div v-for="(d, i) in departments" :key="i" class="dept-item-box" @click="d.open = !d.open">
+      <div class="dept-top"><i :class="d.icon"></i><h3>{{ d.title }}</h3></div>
+      <p style="color:#9ca3af; font-size:1.05rem;">{{ d.summary }}</p>
+      <div v-if="d.open" class="dept-det">
+        <p style="color: #e5e7eb;">{{ d.details }}</p>
+        <h4 style="color:#db2777; margin-top:12px; font-size:1rem;"><i class="fas fa-graduation-cap"></i> 核心课程大纲</h4>
+        <ul><li v-for="c in d.courses">{{ c }}</li></ul>
+        <p style="font-size:0.95rem; color:#fbcfe8; margin-top:12px;"><strong><i class="fas fa-running"></i> 就业与创想画像：</strong>{{ d.career }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 60px;" id="facilities">
+    <h2 class="section-title"><i class="fas fa-theater-masks"></i> 顶尖演播与教学设施</h2>
+    <div class="architecture-grid">
+      <div class="building-card" v-for="(b, i) in facilities" :key="i">
+        <div class="building-img" :style="{ backgroundImage: 'url(' + b.img + ')' }"></div>
+        <div class="building-info"><h3>{{ b.title }}</h3><p style="color:#9ca3af;">{{ b.desc }}</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 60px;" id="academic">
+    <h2 class="section-title"><i class="fas fa-icons"></i> 公共学术与创意生态导航</h2>
+    <div class="academic-grid">
+      <a href="https://www.artstation.com" target="_blank" class="academic-card">
+        <i class="fab fa-artstation"></i>
+        <h3>ArtStation</h3>
+        <p>全球顶尖数字视觉艺术、全栈3D及CG数字媒体设计创想先锋平台。</p>
+      </a>
+      <a href="https://www.behance.net" target="_blank" class="academic-card">
+        <i class="fab fa-behance"></i>
+        <h3>Behance Gallery</h3>
+        <p>Adobe旗下国际创意设计风向标，汇聚全球高级平面、视觉传达灵感源泉。</p>
+      </a>
+      <a href="https://imslp.org" target="_blank" class="academic-card">
+        <i class="fas fa-music"></i>
+        <h3>IMSLP 乐谱库</h3>
+        <p>国际公共领域音乐乐谱、大师级古典交响音轨数据全球共享核心学术网络。</p>
+      </a>
+      <a href="https://www.cnki.net" target="_blank" class="academic-card">
+        <i class="fas fa-book-open"></i>
+        <h3>中国知网艺术辑</h3>
+        <p>国家级艺术学核心期刊理论检索中心，纵览东方美学发展与非遗传承脉络。</p>
+      </a>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 60px;" id="timeline">
+    <h2 class="section-title">美学编年史卷</h2>
+    <div class="horizontal-scroll" id="timeline-container" @scroll="scrollTimeline">
+      <div class="timeline-node" v-for="(t, idx) in timeline" :key="idx">
+        <span class="year-indicator">{{ t.year }}</span>
+        <p style="color:#d1d5db; margin-top:15px; line-height:1.6;">{{ t.event }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:60px;" id="dashboard">
+    <h2 class="section-title">办学指标与艺术成就看板</h2>
+    <div class="stats-grid">
+      <div class="stat-card" v-for="(stat, i) in stats" :key="i">
+        <div class="stat-number">{{ Math.floor(stat.current) }}{{ stat.unit }}</div>
+        <div style="color:#9ca3af; font-size:1.05rem;">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+
+  <footer><p>&copy; 2026 艺术学院. 内蒙古大学新媒体与灵动艺术空间融合大类项目. 保留所有权利.</p></footer>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+  const { createApp, onMounted, reactive } = Vue;
+  createApp({
+    setup() {
+      const collegeData = reactive({ name: "艺术学院" });
+      const departments = reactive([
+        { title: '音乐学', icon: 'fas fa-music', open: false, summary: '融汇古典交响与现代数字声学，培养顶尖音乐表演与理论研究英才。', details: '全方位修行唱腔声乐、交响器乐演奏、和声复调曲式分析以及数字合成电子音效设计。', courses: ['声乐学精要', '交响器乐深度研修', '现代和声曲式', '数码音乐MIDI编辑'], career: '专业文工团乐手、专业音乐剧演员、影视独立配乐大师、知名高校音乐教育骨干。' },
+        { title: '数字媒体艺术', icon: 'fas fa-photo-video', open: false, summary: '跨界CG视效、动作捕捉与人机UI交互，全面进军未来泛娱乐数字文创。', details: '深度进修三维计算机动画、游戏概念设计、XR沉浸式视效合成以及动态粒子渲染艺术。', courses: ['3D数码雕刻基础', '影视特效后期合成', '虚拟现实(VR)交互设计', '游戏概念美术研发'], career: 'AAA大厂游戏动效设计师、电影特效制片专家、数字虚拟偶像运营骨干、UI美学架构师。' },
+        { title: '视觉传达设计', icon: 'fas fa-eye', open: false, summary: '重塑商业品牌叙事，专注于高品质视觉冲击力与现代潮流跨界包装。', details: '钻研现代版面编排拓扑、平面包装动力学、多维字体图形设计以及企业级VI数字资产规划。', courses: ['平面包装工程美学', '商业摄影与构图', '高级VI品牌形象战略', '数字字体版式艺术'], career: '国际4A广告公司创意总监、知名新媒体杂志主编、独立时尚视觉主理人。' }
+      ]);
+      const facilities = reactive([
+        { title: "尚美高保真演播厅", desc: "采用世界声学穹顶设计的专业演播与大师艺术交互中枢，支持实时混响声级追踪。", img: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=600&q=80" },
+        { title: "数字媒体动捕基地", desc: "配备全套高精度红外线骨骼定位摄影捕捉网，完美无缝对接虚幻引擎数字孪生。", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80" }
+      ]);
+      const timeline = reactive([
+        { year: "2005", event: "艺术研讨工作室正式扩组建院，奠定跨越式学科根基。" },
+        { year: "2016", event: "建成多媒体新媒体交叉设计基地，正式进军数字创意红海。" },
+        { year: "2026", event: "大跨度数字空间3D工坊及动作捕捉基地全面构建完工并投入教研。" }
+      ]);
+      const stats = reactive([
+        { label: '专业音乐大厅席位', target: 850, current: 0, unit: ' 座' },
+        { label: '国际/国家级金奖', target: 46, current: 0, unit: ' 项' },
+        { label: '创意孵化工作室', target: 24, current: 0, unit: ' 间' },
+        { label: '产学研深度签约基地', target: 35, current: 0, unit: ' 家' }
+      ]);
+
+      const scrollTimeline = () => {
+        const container = document.getElementById('timeline-container'), nodes = container.getElementsByClassName('year-indicator');
+        const center = container.getBoundingClientRect().left + container.clientWidth / 2;
+        Array.from(nodes).forEach(n => {
+          const dist = Math.abs(center - (n.getBoundingClientRect().left + n.getBoundingClientRect().width / 2));
+          if (dist < container.clientWidth / 2) {
+            n.style.transform = `scale(${1 + (1 - dist / (container.clientWidth / 2)) * 0.3})`;
+          } else { n.style.transform = `scale(1)`; }
+        });
+      };
+
+      onMounted(() => {
+        const obs = new IntersectionObserver((el) => {
+          if (el[0].isIntersecting) { stats.forEach(s => gsap.to(s, { current: s.target, duration: 2.2 })); }
+        }, { threshold: 0.1 });
+        obs.observe(document.getElementById('dashboard'));
+        initGlowBubles(); setTimeout(scrollTimeline, 200);
+      });
+      return { collegeData, departments, facilities, timeline, scrollTimeline, stats };
+    }
+  }).mount('#app');
+
+  function initGlowBubles() {
+    const canvas = document.getElementById('particle-canvas'), ctx = canvas.getContext('2d');
+    let pts = [];
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.addEventListener('resize', resize); resize();
+
+    class ArtBubble {
+      constructor() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height+canvas.height; this.r = Math.random()*25+15; this.speed = Math.random()*1 + 0.5; this.alpha = Math.random()*0.3 + 0.1; this.color = Math.random() > 0.5 ? '219,39,119' : '190,24,93'; }
+      draw() {
+        ctx.save();
+        let g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r);
+        g.addColorStop(0, `rgba(${this.color}, ${this.alpha})`);
+        g.addColorStop(1, `rgba(${this.color}, 0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
+      update() { this.y -= this.speed; if(this.y < -50) { this.y = canvas.height+50; this.x = Math.random()*canvas.width; } }
+    }
+    for(let i=0; i<45; i++) pts.push(new ArtBubble());
+    function frame() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      pts.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(frame);
+    }
+    frame();
+  }
+</script>
+</body>
+</html>

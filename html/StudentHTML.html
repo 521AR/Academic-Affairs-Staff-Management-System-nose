@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .toolbar {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .action-buttons button {
+            padding: 5px 10px;
+            margin: 0 2px;
+            font-size: 12px;
+        }
+        .delete-btn {
+            background-color: #f44336;
+        }
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+        .update-btn {
+            background-color: #2196F3;
+        }
+        .update-btn:hover {
+            background-color: #0b7dda;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .modal-footer {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .cancel-btn {
+            background-color: #ccc;
+        }
+        .cancel-btn:hover {
+            background-color: #999;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #ccc;
+        }
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>学生管理系统</h1>
+
+    <div class="tab">
+        <button class="tablinks active" onclick="openTab(event, 'basic')">基本信息</button>
+        <button class="tablinks" onclick="openTab(event, 'detail')">详细信息</button>
+    </div>
+
+    <div id="basic" class="tabcontent" style="display:block">
+        <div class="toolbar">
+            <button onclick="openCreateModal()">添加学生</button>
+        </div>
+
+        <table id="studentTable">
+            <thead>
+            <tr>
+                <th>学号</th>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>电话</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="studentTableBody">
+            <!-- 数据将通过JavaScript动态填充 -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="detail" class="tabcontent">
+        <table id="studentDetailTable">
+            <thead>
+            <tr>
+                <th>学号</th>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>电话</th>
+                <th>学院</th>
+                <th>专业</th>
+            </tr>
+            </thead>
+            <tbody id="studentDetailTableBody">
+            <!-- 详细数据将通过JavaScript动态填充 -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 创建/更新学生模态框 -->
+<div id="studentModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">添加学生</h2>
+        <form id="studentForm">
+            <input type="hidden" id="studentId">
+            <div class="form-group">
+                <label for="inputStudentId">学号:</label>
+                <input type="number" id="inputStudentId" required>
+            </div>
+
+            <div class="form-group">
+                <label for="studentName">姓名:</label>
+                <input type="text" id="studentName" required>
+            </div>
+            <div class="form-group">
+                <label for="studentGender">性别:</label>
+                <select id="studentGender" required>
+                    <option value="">请选择</option>
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="studentPhone">电话:</label>
+                <input type="text" id="studentPhone" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" onclick="closeModal()">取消</button>
+                <button type="submit">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // 页面加载时获取所有学生数据
+    document.addEventListener('DOMContentLoaded', function() {
+        getAllStudents();
+
+        // 绑定表单提交事件
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveStudent();
+        });
+    });
+
+    // Tab切换功能
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+
+        // 如果切换到详细信息tab，则加载详细数据
+        if(tabName === 'detail') {
+            getAllStudentsWithCollegeInfo();
+        }
+    }
+
+    // 获取所有学生基本信息
+    function getAllStudents() {
+        fetch('http://localhost:8080/getAllstudent')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('studentTableBody');
+                tbody.innerHTML = '';
+
+                data.forEach(student => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${student.studentId || ''}</td>
+                        <td>${student.studentname || ''}</td>
+                        <td>${student.gender || ''}</td>
+                        <td>${student.phone || ''}</td>
+                        <td class="action-buttons">
+                            <button class="update-btn" onclick='openUpdateModal(${JSON.stringify(student)})'>更新</button>
+                            <button class="delete-btn" onclick="deleteStudent(${student.studentId})">删除</button>
+                        </td>
+                    `;
+                });
+            })
+            .catch(error => {
+                console.error('获取学生数据失败:', error);
+                alert('获取学生数据失败');
+            });
+    }
+
+    // 获取所有学生详细信息（包括学院和专业）
+    function getAllStudentsWithCollegeInfo() {
+        fetch('http://localhost:8080/getAllWithCollegeInfo')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('studentDetailTableBody');
+                tbody.innerHTML = '';
+
+                data.forEach(student => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${student.studentId || ''}</td>
+                        <td>${student.studentname || ''}</td>
+                        <td>${student.gender || ''}</td>
+                        <td>${student.phone || ''}</td>
+                        <td>${student.collegename || ''}</td>
+                        <td>${student.professionName || ''}</td>
+                    `;
+                });
+            })
+            .catch(error => {
+                console.error('获取学生详细数据失败:', error);
+                alert('获取学生详细数据失败');
+            });
+    }
+
+    // 打开创建学生模态框
+    function openCreateModal() {
+        document.getElementById('modalTitle').textContent = '添加学生';
+        document.getElementById('studentForm').reset();
+        document.getElementById('studentId').value = '';
+        document.getElementById('studentModal').style.display = 'block';
+    }
+
+    // 打开更新学生模态框
+    function openUpdateModal(student) {
+        document.getElementById('modalTitle').textContent = '更新学生';
+        document.getElementById('studentId').value = student.id || '';
+        document.getElementById('inputStudentId').value = student.studentId || '';
+        document.getElementById('studentName').value = student.studentname || '';
+        document.getElementById('studentGender').value = student.gender || '';
+        document.getElementById('studentPhone').value = student.phone || '';
+        document.getElementById('studentModal').style.display = 'block';
+    }
+
+    // 关闭模态框
+    function closeModal() {
+        document.getElementById('studentModal').style.display = 'none';
+    }
+
+    // 保存学生（创建或更新）
+    function saveStudent() {
+        const id = document.getElementById('studentId').value;
+        const studentData = {
+            studentId: document.getElementById('inputStudentId').value,
+            studentname: document.getElementById('studentName').value,
+            gender: document.getElementById('studentGender').value,
+            phone: document.getElementById('studentPhone').value
+        };
+
+        // 数据验证
+        if (!studentData.studentId || !studentData.studentname || !studentData.gender || !studentData.phone) {
+            alert('请填写所有必填字段');
+            return;
+        }
+
+        // 电话号码格式验证
+        const phoneRegex = /^1[3-9]\d{9}$/;
+        if (!phoneRegex.test(studentData.phone)) {
+            alert('请输入正确的手机号码格式');
+            return;
+        }
+
+        let url, method;
+
+        if (id) {
+            // 更新学生
+            url = `http://localhost:8080/update/${studentData.studentId}`;
+            method = 'PUT';
+        } else {
+            // 创建学生
+            url = 'http://localhost:8080/insert';
+            method = 'POST';
+        }
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(studentData)
+        })
+            .then(response => {
+                if (response.status === 200) {
+                    closeModal();
+                    getAllStudents();
+                    alert(id ? '学生更新成功' : '学生创建成功');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            })
+            .catch(error => {
+                console.error('保存学生失败:', error);
+                alert(id ? '学生更新失败' : '学生创建失败');
+            });
+    }
+
+    // 删除学生
+    function deleteStudent(studentId) {
+        if (confirm('确定要删除这个学生吗？')) {
+            fetch(`http://localhost:8080/delete/${studentId}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.status)
+                .then(status => {
+                    if (status === 200) {
+                        getAllStudents();
+                        alert('学生删除成功');
+                    } else {
+                        alert('学生删除失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('删除学生失败:', error);
+                    alert('删除学生失败');
+                });
+        }
+    }
+
+    // 点击模态框外部关闭
+    window.onclick = function(event) {
+        const modal = document.getElementById('studentModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>身份矩阵验证中枢 - 用户登录</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #020617 !important;
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 🌌 动态量子引力粒子网络画布 */
+        #login-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+        }
+
+        /* 登录舞台居中定位外壳 */
+        .login-wrapper {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
+            perspective: 1000px;
+        }
+
+        /* 全息赛博毛玻璃浮动表单盒舱 */
+        .login-box {
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(34, 211, 238, 0.15);
+            border-radius: 28px;
+            padding: 45px 35px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 25px 55px rgba(0, 0, 0, 0.5), 0 0 30px rgba(34, 211, 238, 0.05);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: border-color 0.4s, box-shadow 0.4s;
+        }
+        .login-box::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, transparent, #22d3ee, transparent); opacity: 0.8;
+        }
+        .login-box:hover {
+            border-color: rgba(34, 211, 238, 0.35);
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.6), 0 0 40px rgba(34, 211, 238, 0.15);
+        }
+
+        /* 顶部标题区 */
+        .login-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        .login-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .login-header .subtitle {
+            font-size: 0.92rem;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        /* 科技响应式输入框卡槽 */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .input-with-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-with-icon i {
+            position: absolute;
+            left: 14px;
+            color: #475569;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+            display: flex; align-items: center;
+        }
+        .form-control {
+            width: 100%;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 0 15px 0 45px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .form-control:focus {
+            outline: none;
+            background: rgba(34, 211, 238, 0.02);
+            border-color: #22d3ee;
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.12);
+        }
+        .form-control:focus + i,
+        .form-control:focus ~ i,
+        .input-with-icon:focus-within i {
+            color: #22d3ee !important;
+        }
+        /* 兼容原有内嵌SVG */
+        .input-with-icon svg { transition: stroke 0.3s; }
+        .input-with-icon:focus-within svg circle,
+        .input-with-icon:focus-within svg path,
+        .input-with-icon:focus-within svg rect {
+            stroke: #22d3ee !important;
+        }
+
+        /* 选项栏 */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.88rem;
+            margin-bottom: 30px;
+        }
+        .checkbox-container {
+            display: flex; align-items: center; gap: 8px; color: #94a3b8; cursor: pointer; user-select: none;
+        }
+        .checkbox-container input { cursor: pointer; accent-color: #22d3ee; }
+        .forgot-link {
+            color: #64748b; text-decoration: none; transition: color 0.3s;
+        }
+        .forgot-link:hover { color: #22d3ee; }
+
+        /* 错误报警平滑弹出面板 */
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #f87171;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            margin-bottom: 22px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* 汞流体反射胶囊提交按钮 */
+        .login-btn {
+            width: 100%;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            color: #ffffff;
+            font-size: 1.02rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: all 0.4s ease;
+        }
+        .login-btn:hover {
+            background: #22d3ee;
+            color: #020617;
+            border-color: transparent;
+            box-shadow: 0 10px 25px rgba(34, 211, 238, 0.35);
+        }
+
+        /* 底部链接区 */
+        .register-section {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.88rem;
+        }
+        .register-text { color: #64748b; }
+        .register-link {
+            color: #22d3ee; text-decoration: none; font-weight: 600; margin-left: 4px; transition: color 0.3s;
+        }
+        .register-link:hover { color: #ffffff; text-shadow: 0 0 10px #22d3ee; }
+
+        /* Vue 动画梯度 */
+        .error-fade-enter-active, .error-fade-leave-active { transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        .error-fade-enter, .error-fade-leave-to { opacity: 0; transform: translateY(-8px); }
+    </style>
+</head>
+<body>
+<canvas id="login-canvas"></canvas>
+
+<div id="app" class="login-wrapper">
+    <div class="login-box">
+        <div class="login-header">
+            <h1>欢迎User登录</h1>
+            <p class="subtitle">请输入账号与密码接入身份矩阵</p>
+        </div>
+
+        <form id="userLoginForm" @submit.prevent="toUserLogin" novalidate>
+            <div class="form-group">
+                <label for="userId">用户账号</label>
+                <div class="input-with-icon">
+                    <i class="icon-user">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="8" r="4" stroke="#475569" stroke-width="2"/>
+                            <path d="M20 21C20 16.5817 16.4183 13 12 13C7.58172 13 4 16.5817 4 21" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </i>
+                    <input
+                            type="text"
+                            id="userId"
+                            name="userId"
+                            v-model.trim="formData.userId"
+                            placeholder="请输入用户账号……"
+                            autocomplete="off"
+                            class="form-control"
+                    />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">密码</label>
+                <div class="input-with-icon">
+                    <i class="icon-lock">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <rect x="4" y="10" width="16" height="10" rx="2" stroke="#475569" stroke-width="2"/>
+                            <path d="M9 10V7C9 4.79086 10.7909 3 13 3H15C17.2091 3 19 4.79086 19 7V10" stroke="#475569" stroke-width="2"/>
+                        </svg>
+                    </i>
+                    <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            v-model="formData.password"
+                            placeholder="••••••••"
+                            class="form-control"
+                    />
+                </div>
+            </div>
+
+            <div class="form-options">
+                <label class="checkbox-container">
+                    <input type="checkbox" v-model="formData.remberme"/>
+                    记住我
+                </label>
+                <a href="#" class="forgot-link" @click.prevent="showForgotAlert">忘记密码？</a>
+            </div>
+
+            <transition name="error-fade">
+                <p id="error" class="error-message" v-if="errorMsg" v-html="errorMsg"></p>
+            </transition>
+
+            <button type="submit" class="login-btn">
+                <span class="btn-text">登 录</span>
+            </button>
+
+            <div class="register-section">
+                <p class="register-text">还没有账号？<a href="register.html" class="register-link">去注册</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+    // 100% 保留原有运行逻辑与数据属性不变
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                host: 'http://localhost:8080',
+                formData: {
+                    userId: '',
+                    password: '',
+                    remberme: false
+                },
+                errorMsg: '',
+                timer: null
+            }
+        },
+        methods: {
+            toUserLogin() {
+                if (!this.formData.userId) {
+                    this.showError('用户账号不能为空！');
+                    return;
+                }
+                if (!this.formData.password) {
+                    this.showError('请填写密码！');
+                    return;
+                }
+                if (this.formData.password.length < 6) {
+                    this.showError('密码不能少于6位！');
+                    return;
+                }
+
+                axios.post(`${this.host}/userslogin/login`, this.formData)
+                    .then(res => {
+                        if (res.data && res.data.success) {
+                            localStorage.setItem('jwt_token', res.data.token);
+                            localStorage.setItem('username', res.data.username);
+                            localStorage.setItem('role', res.data.role);
+                            localStorage.setItem('nickname', res.data.nickname);
+                            window.location.href = "Userindex.html";
+                        } else {
+                            this.showError(res.data.message || "用户名或密码错误！");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("登录请求出错:", error);
+                        this.showError("登录请求失败，请稍后再试！");
+                    });
+            },
+            showError(msg) {
+                this.errorMsg = msg;
+                this.clearErrorTimer();
+                this.timer = setTimeout(() => {
+                    this.errorMsg = '';
+                }, 3000);
+            },
+            clearErrorTimer() {
+                if (this.timer) {
+                    clearTimeout(this.timer);
+                    this.timer = null;
+                }
+            },
+            showForgotAlert() {
+                alert('请联系管理员重置密码');
+            }
+        },
+        beforeDestroy() {
+            this.clearErrorTimer();
+        }
+    });
+
+    // ==========================================
+    // 🪐 渲染用户侧专属：赛博青拓扑缓动粒子网络
+    // ==========================================
+    const canvas = document.getElementById('login-canvas'), ctx = canvas.getContext('2d');
+    let nodes = [], mouse = { x: null, y: null, radius: 180 };
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.addEventListener('resize', resize);
+    window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+    resize();
+
+    class QuantumNode {
+        constructor() {
+            this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 0.7; this.vy = (Math.random() - 0.5) * 0.7;
+            this.r = Math.random() * 2 + 1;
+        }
+        draw() {
+            ctx.fillStyle = 'rgba(34, 211, 238, 0.5)';
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill();
+        }
+        update() {
+            this.x += this.vx; this.y += this.vy;
+            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            if (mouse.x != null && mouse.y != null) {
+                let dx = mouse.x - this.x, dy = mouse.y - this.y, dist = Math.hypot(dx, dy);
+                if (dist < mouse.radius) {
+                    let force = (mouse.radius - dist) / mouse.radius;
+                    this.x -= (dx / dist) * force * 1.5; this.y -= (dy / dist) * force * 1.5;
+                }
+            }
+        }
+    }
+    for (let i = 0; i < 75; i++) nodes.push(new QuantumNode());
+    function loop() {
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.15)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let a = 0; a < nodes.length; a++) {
+            for (let b = a + 1; b < nodes.length; b++) {
+                let dist = Math.hypot(nodes[a].x - nodes[b].x, nodes[a].y - nodes[b].y);
+                if (dist < 110) {
+                    ctx.strokeStyle = `rgba(34, 211, 238, ${0.15 - dist / 110})`; ctx.lineWidth = 0.6;
+                    ctx.beginPath(); ctx.moveTo(nodes[a].x, nodes[a].y); ctx.lineTo(nodes[b].x, nodes[b].y); ctx.stroke();
+                }
+            }
+        }
+        nodes.forEach(n => { n.update(); n.draw(); }); requestAnimationFrame(loop);
+    }
+    loop();
+</script>
+</body>
+</html>

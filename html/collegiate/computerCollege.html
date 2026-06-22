@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>信息工程学院 - 数智视界空间</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior: smooth; }
+
+    /* 🌌 顶级数智美学底层：全黑曜石硅基 Void 深空，静谧、严谨、深邃 */
+    body {
+      font-family: "JetBrains Mono", "Fira Code", "Consolas", system-ui, -apple-system, sans-serif;
+      background: #02040a !important; color: #e2e8f0; overflow-x: hidden;
+      letter-spacing: -0.3px;
+    }
+
+    /* 💻 核心重写：传统二进制总线与现代 AI 神经网络突触交织的高动态粒子视差画布 */
+    #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.42; }
+    .container { position: relative; z-index: 2; width: 100%; padding: 60px 140px 60px 60px; }
+
+    /* 🔒 强制吸附：高级全息测绘控制台右侧挂靠导航栏 */
+    .sidebar-dock {
+      position: fixed !important; right: 35px !important; top: 50% !important; transform: translateY(-50%) !important;
+      background: rgba(5, 9, 20, 0.72) !important; border: 1px solid rgba(34, 211, 238, 0.25) !important;
+      backdrop-filter: blur(25px) !important; -webkit-backdrop-filter: blur(25px) !important;
+      padding: 26px 12px !important; border-radius: 18px !important;
+      display: flex !important; flex-direction: column !important; gap: 22px !important;
+      z-index: 999999 !important;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85), inset 0 0 20px rgba(34, 211, 238, 0.04) !important;
+    }
+    .dock-item {
+      width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,0.01);
+      display: flex; align-items: center; justify-content: center; color: #475569;
+      text-decoration: none; font-size: 1.1rem; transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1); position: relative;
+      border: 1px solid rgba(255,255,255,0.02);
+    }
+    .dock-item span {
+      position: absolute; right: 65px; background: #040814; color: #22d3ee;
+      padding: 8px 16px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;
+      white-space: nowrap; opacity: 0; pointer-events: none; transform: translateX(12px); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 1px solid rgba(34, 211, 238, 0.35); box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      letter-spacing: 1.5px;
+    }
+    .dock-item:hover span { opacity: 1; transform: translateX(0); }
+    .dock-item:hover { background: rgba(34, 211, 238, 0.08); color: #22d3ee; border-color: #22d3ee; transform: translateY(-2px); }
+
+    /* 返回大厅专属高阶量子纠缠键 */
+    .dock-item.global-btn {
+      background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%); color: #ffffff !important;
+      border: 1px solid rgba(255,255,255,0.15) !important;
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.35), inset 0 0 8px rgba(255,255,255,0.3);
+    }
+    .dock-item.global-btn span { background: #02050a; color: #22d3ee; border-color: rgba(34, 211, 238, 0.4); }
+    .dock-item.global-btn:hover { box-shadow: 0 0 25px #22d3ee; transform: scale(1.06) translateY(-2px); }
+
+    /* Hero 高精尖数智控制流顶盖区 */
+    .hero { height: 48vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; }
+    .hero-title {
+      font-size: 5rem; font-weight: 800; background: linear-gradient(180deg, #ffffff 30%, #38bdf8 75%, #0284c7 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 12px;
+      filter: drop-shadow(0 0 35px rgba(56, 189, 248, 0.25));
+    }
+    .hero-log-flow {
+      margin-top: 15px; font-family: "Fira Code", monospace; font-size: 11px; color: #334155; letter-spacing: 0.5px;
+    }
+    .hero-subtitle { font-size: 1.15rem; color: #475569; margin-top: 24px; font-weight: 700; letter-spacing: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 15px; }
+    .hero-subtitle::before, .hero-subtitle::after { content: ''; display: inline-block; width: 45px; height: 1px; background: rgba(56, 189, 248, 0.3); }
+
+    /* 学院概况舱 */
+    .intro-section { padding: 50px 0; max-width: 1000px; margin: 0 auto; text-align: center; }
+    .section-title { font-size: 1.9rem; margin-bottom: 45px; color: #ffffff; font-weight: 800; letter-spacing: 3px; position: relative; display: inline-block; }
+    .section-title::after { content:''; position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%); width: 35px; height: 2px; background: #22d3ee; box-shadow: 0 0 12px #22d3ee; }
+    .intro-text { font-size: 1.08rem; color: #8ea1bb; line-height: 2.1; margin-bottom: 24px; text-align: justify; text-justify: inter-word; }
+
+    /* 动力学粒子碰撞数智沙盒舱 */
+    .physics-section { padding: 50px 0; text-align: center; }
+    .physics-container {
+      width: 100%; max-width: 1120px; height: 490px; margin: 0 auto; position: relative; border-radius: 24px; overflow: hidden;
+      background: rgba(4, 7, 16, 0.45); border: 1px solid rgba(255, 255, 255, 0.03); backdrop-filter: blur(30px);
+      box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.9), 0 30px 60px rgba(0,0,0,0.6);
+    }
+    /* 沙盒单元：微晶圆总线微处理器卡片 */
+    .physics-ball {
+      position: absolute; width: 175px; height: 175px; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+      font-weight: 700; font-size: 0.85rem; color: #94a3b8; cursor: grab; padding: 22px; text-align: center;
+      background: rgba(9, 14, 28, 0.85); border: 1px solid rgba(34, 211, 238, 0.25);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(34, 211, 238, 0.02); transition: border-color 0.3s, color 0.3s, box-shadow 0.3s;
+    }
+    .physics-ball::before {
+      content: '[CORE_REGISTER_CELL]'; position: absolute; top: 10px; left: 14px; font-size: 8px; color: #334155; font-family: monospace; letter-spacing: 0.5px;
+    }
+    .physics-ball:hover { border-color: #38bdf8; color: #ffffff; box-shadow: 0 0 25px rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.02); }
+    .physics-ball i { font-size: 1.75rem; margin-bottom: 14px; color: #22d3ee; transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+    .physics-ball:hover i { transform: scale(1.1) translateY(-3px); filter: drop-shadow(0 0 10px #22d3ee); }
+
+    /* 专业三大支柱拓扑线框卡片阵列 */
+    .departments { padding: 50px 0; max-width: 1150px; margin: 0 auto; }
+    .department-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 35px; }
+
+    .department-card {
+      background: rgba(6, 11, 22, 0.4); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 20px;
+      padding: 40px 35px; cursor: pointer; backdrop-filter: blur(15px); transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      position: relative; overflow: hidden;
+    }
+    /* 四角精密编译针脚标志 */
+    .department-card::before {
+      content: ''; position: absolute; top: 15px; left: 15px; width: 10px; height: 10px; border-top: 1px solid rgba(34, 211, 238, 0.3); border-left: 1px solid rgba(34, 211, 238, 0.3); opacity: 0.4; transition: all 0.3s;
+    }
+    .department-card::after {
+      content: 'SILICON-PARADIGM-v2.06'; position: absolute; bottom: 12px; right: 20px; font-size: 8.5px; color: rgba(255,255,255,0.03); font-family: monospace; letter-spacing: 1px;
+    }
+    .department-card:hover::before { width: 25px; height: 25px; opacity: 1; border-color: #22d3ee; }
+    .department-card:hover { transform: translateY(-6px); border-color: rgba(34, 211, 238, 0.35); background: rgba(10, 18, 36, 0.65); box-shadow: 0 30px 60px rgba(0,0,0,0.7); }
+
+    .dept-header { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
+    .dept-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(34, 211, 238, 0.04); display: flex; align-items: center; justify-content: center; color: #22d3ee; font-size: 1.35rem; border: 1px solid rgba(34, 211, 238, 0.15); transition: all 0.3s; }
+    .department-card:hover .dept-icon { color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05); }
+    .department-card h3 { font-size: 1.18rem; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; }
+
+    /* 细节收拉层 */
+    .dept-expanded-content { margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 22px; animation: computerSlide 0.45s cubic-bezier(0.165, 0.84, 0.44, 1); }
+    .dept-expanded-content ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+    .dept-expanded-content li { background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); padding: 5px 12px; border-radius: 5px; font-size: 0.78rem; color: #516377; font-family: monospace; letter-spacing: 0.5px; }
+    .department-card:hover .dept-expanded-content li { color: #38bdf8; border-color: rgba(34, 211, 238, 0.12); }
+
+    /* 核心学术导向引航舱 */
+    .academic-section { padding: 50px 0; max-width: 1150px; margin: 0 auto; }
+    .academic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
+    .academic-card {
+      background: rgba(6, 11, 22, 0.4); border: 1px solid rgba(255,255,255,0.01); border-radius: 16px; padding: 32px 24px;
+      text-align: center; text-decoration: none; color: inherit; transition: all 0.35s ease; display: block; position: relative;
+    }
+    .academic-card:hover { border-color: #22d3ee; background: rgba(34, 211, 238, 0.01); transform: translateY(-5px); box-shadow: 0 20px 45px rgba(34, 211, 238, 0.06); }
+    .academic-card i { font-size: 1.9rem; color: #475569; margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.15)); transition: color 0.3s; }
+    .academic-card:hover i { color: #22d3ee; }
+    .academic-card h3 { font-size: 1.02rem; color: #ffffff; margin-bottom: 12px; font-weight: 700; }
+    .academic-card p { font-size: 0.85rem; color: #4a5d73; line-height: 1.65; text-align: justify; }
+
+    /* 算力集群绩效面板 */
+    .dashboard-section { padding: 50px 0; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 35px; max-width: 1150px; margin: 0 auto; }
+    .stat-card { background: rgba(255, 255, 255, 0.003); border: 1px solid rgba(255, 255, 255, 0.01); padding: 50px 30px; border-radius: 20px; text-align: center; box-shadow: inset 0 0 30px rgba(0,0,0,0.2); }
+    .stat-number { font-size: 3.3rem; font-weight: 800; color: #22d3ee; margin-bottom: 14px; text-shadow: 0 0 35px rgba(34, 211, 238, 0.3); font-family: system-ui; }
+
+    @keyframes computerSlide { from { opacity: 0; transform: translateY(12px) scaleY(0.96); } to { opacity: 1; transform: translateY(0) scaleY(1); } }
+    footer { text-align: center; padding: 100px 0 40px; color: #1b2636; font-size: 0.82rem; border-top: 1px solid rgba(255,255,255,0.01); font-family: monospace; letter-spacing: 0.5px; }
+  </style>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+
+<nav class="sidebar-dock">
+  <a href="javascript:void(0)" onclick="window.top.location.href='../index.html'" class="dock-item global-btn" title="返回大厅系统"><i class="fas fa-globe"></i><span>返回大厅中枢</span></a>
+  <a href="#intro" class="dock-item" title="学院概况"><i class="fas fa-microchip"></i><span>学院概况</span></a>
+  <a href="#sandbox" class="dock-item" title="数智技术名片"><i class="fas fa-brain"></i><span>数智演进名片</span></a>
+  <a href="#departments" class="dock-item" title="专业设置"><i class="fas fa-network-wired"></i><span>专业拓扑架构</span></a>
+  <a href="#academic" class="dock-item" title="核心学术资源"><i class="fas fa-terminal"></i><span>数智公共引航</span></a>
+  <a href="#dashboard" class="dock-item" title="超算成果看板"><i class="fas fa-server"></i><span>算力成就看板</span></a>
+</nav>
+
+<div id="app" class="container">
+  <section class="hero" id="intro">
+    <h1 class="hero-title">{{ collegeData.title }}</h1>
+    <div class="hero-log-flow">[SYSTEM KERNEL ONLINE // TENSOR_CORES: AWAKENED // MODEL_LOSS: 0.0016]</div>
+    <p class="hero-subtitle">从确定性逻辑硅基底层走向不确定性自适应多维张量认知网络</p>
+  </section>
+
+  <section class="intro-section">
+    <h2 class="section-title">学院概况</h2>
+    <p class="intro-text">信息工程学院深度立足于图灵完备理论开端与冯·诺依曼底层体系结构，全面高能前瞻当今大规模语言模型（LLM）、Transformer 自注意力机制、多模态融合及强异构分布式算力并行加速的技术最前沿。学院致力于培养兼具硬核编译系统内核调优功底、高并发高可用软件工程总成能力，同时拥有前沿大模型微调部署与大规模张量分布式处理创新能力的硅基全栈型领军英才。学院建有一流的异构算力中心、大模型产研一体化中枢，全力驱动经典计算机理论向认知人工智能跨越的时代潮头。</p>
+  </section>
+
+  <section class="physics-section">
+    <h2 class="section-title">数智演进名片</h2>
+    <p style="color: #334155; margin-bottom: 30px; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.5px;">⚙️ 全息遥测：<b>点击或自由拖拽绝对力场单元</b>可随时解构计算机底层科学与多模态AI前沿专利成果。自带纯净碰撞约束矩阵。</p>
+    <div class="physics-container" id="sandbox">
+      <div v-for="(ball, idx) in physicsBalls" :key="idx" class="physics-ball" :style="{ left: ball.x + 'px', top: ball.y + 'px' }" @mousedown="startDrag($event, idx)">
+        <i :class="ball.icon"></i><span>{{ ball.text }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="departments" id="departments">
+    <h2 class="section-title">专业拓扑架构</h2>
+    <div class="department-grid">
+      <div v-for="(dept, i) in departments" :key="i" class="department-card" @click="dept.expanded = !dept.expanded">
+        <div class="dept-header">
+          <div class="dept-icon"><i :class="dept.icon"></i></div>
+          <h3>{{ dept.name }}</h3>
+        </div>
+        <p class="intro-text" style="font-size:0.9rem; color:#4a5d73; margin-bottom:0; line-height: 1.65;">{{ dept.summary }}</p>
+        <div v-if="dept.expanded" class="dept-expanded-content">
+          <p style="color: #8da1bb; line-height: 1.75; font-size: 0.9rem; text-align: justify;">{{ dept.details }}</p>
+          <h4 style="color:#22d3ee; margin-top:20px; font-size:0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fas fa-code-branch"></i> 硅基学分科研核心学科体系</h4>
+          <ul><li v-for="c in dept.courses">{{ c }}</li></ul>
+          <p style="font-size:0.85rem; color:#38bdf8; margin-top:16px; font-weight:600;"><i class="fas fa-space-shuttle"></i> 顶尖互联网与人工智能产业去向：<span style="color:#cbd5e1; font-weight: 500; font-family: sans-serif;">{{ dept.career }}</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="academic-section" id="academic">
+    <h2 class="section-title">数智生态与全球公共学术向导</h2>
+    <div class="academic-grid">
+      <a href="https://dl.acm.org" target="_blank" class="academic-card">
+        <i class="fas fa-layer-group"></i>
+        <h3>ACM Digital Library</h3>
+        <p>计算机协会全球首屈一指的文献索引文库，深入溯源经典图灵完备理论与分布式高并发大型架构规范。</p>
+      </a>
+      <a href="https://ieeexplore.ieee.org" target="_blank" class="academic-card">
+        <i class="fas fa-network-wired"></i>
+        <h3>IEEE Xplore Library</h3>
+        <p>全球电气与电子工程师学会权威数据库，提供超大规模集成电路（VLSI）、微处理器总线硬件级核心期刊。</p>
+      </a>
+      <a href="https://arxiv.org" target="_blank" class="academic-card">
+        <i class="fas fa-brain"></i>
+        <h3>arXiv AI Archives</h3>
+        <p>康奈尔大学开源学术前沿阵地，每日高保真极速同步全球顶级大模型（LLM）与Transformer架构最新进展微调论文。</p>
+      </a>
+      <a href="https://github.com" target="_blank" class="academic-card">
+        <i class="fab fa-github"></i>
+        <h3>GitHub Open Source</h3>
+        <p>全球开源协作代码托管平台，探寻顶尖深度学习框架（PyTorch / JAX）的最核心开源分布式分支。</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="dashboard-section" id="dashboard">
+    <h2 class="section-title">算力资产与科研综合指标</h2>
+    <div class="stats-grid">
+      <div class="stat-card" v-for="(stat, i) in stats" :key="i">
+        <div class="stat-number" :style="{color: stat.color}">{{ Math.floor(stat.current) }}{{ stat.unit }}</div>
+        <div style="color:#475569; font-size:0.9rem; font-weight:700; letter-spacing: 0.5px;">{{ stat.label }}</div>
+      </div>
+    </div>
+  </section>
+
+  <footer><p>COMPUTATIONAL TELEMETRY // &copy; 2026 信息工程学院. 内蒙古大学数智中枢与复杂分布式管理系统体系. 保留所有权利.</p></footer>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+  const { createApp, reactive, onMounted } = Vue;
+  createApp({
+    setup() {
+      const collegeData = reactive({ title: "信息工程学院" });
+      const physicsBalls = reactive([
+        { text: '确定性通用图灵理论', icon: 'fas fa-server', x: 60, y: 70, vx: 1.3, vy: 1.5, url: 'https://dl.acm.org/' },
+        { text: 'Transformer多维张量', icon: 'fas fa-brain', x: 280, y: 180, vx: -1.6, vy: 1.4, url: 'https://arxiv.org/abs/1706.03762' },
+        { text: '并发微服务集群总线', icon: 'fas fa-network-wired', x: 520, y: 90, vx: 1.7, vy: -1.2, url: 'https://ieeexplore.ieee.org/' },
+        { text: '编译原理与系统内核隔离', icon: 'fas fa-terminal', x: 740, y: 230, vx: -1.4, vy: -1.5, url: 'https://dl.acm.org/journals' },
+        { text: '多模态扩散潜空间视觉', icon: 'fas fa-eye', x: 180, y: 320, vx: 1.2, vy: -1.3, url: 'https://github.com/topics/computer-vision' },
+        { text: '分布式GPU集群硬件加速', icon: 'fas fa-microchip', x: 600, y: 300, vx: -1.5, vy: 1.4, url: 'https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=57' }
+      ]);
+      const departments = reactive([
+        { name: '计算机科学与技术 / 软件工程', icon: 'fas fa-laptop-code', expanded: false, summary: '传统确定性硅基计算的两大基石，聚焦于高性能Linux系统内核调优与大型高并发分布式软件架构总成。', details: '深研经典数据结构算法分析、操作系统内核级线程隔离、大型关系型数据库索引B+树底层物理调优。同时打牢自动化CI/CD持续集成管道设计、微服务网关限流控制，培养在行业经典的Controller-Service-Repository multi-module分层架构下榨干硅基硬件性能的底层基础设施系统工程师。', courses: ['高级算法与复杂度分析', 'Linux内核源码结构深度解构', '高级面向对象架构设计', '高并发微服务中间件治理', '系统编译工程原理'], career: '顶级超算中心研发科学家、金融高并发系统架构师、底层总线/内核核心研发主管。' },
+        { name: '人工智能 / 智能科学与技术', icon: 'fas fa-brain', expanded: false, summary: '前沿非线性概率认知科学先驱，主攻多维深度神经网络、多模态关联和大规模大语言模型（LLM）。', details: '核心主攻深度学习反向传播自适应权重调优、大规模多模态语言模型对齐微调（LLM Alignment）、张量算力并行分布式训练加速、知识图谱逻辑推理以及机器视觉特征锚定。', courses: ['深度学习张量网络基础', '自然语言Transformer解构', '强化学习复杂决策树', 'Python异构算力加速', '机器视觉高维特征提取'], career: 'AI大模型算法科学家、深度学习训练调优专家、CV多模态认知工程架构师。' },
+        { name: '数据科学与大数据技术 / 网络与物联网工程', icon: 'fas fa-network-wired', expanded: false, summary: '万物互联与分布式多维时空拓扑中枢，聚焦于海量流数据实时计算与万物互联物联网感知隔离。', details: '主攻分布式多节点非关系型存储集群管理、Hadoop/Spark流计算引擎内核调优、高感度复杂射频物联网拓扑网络路由规划以及国密级别分布式信息安全防御机制。', courses: ['海量分布式流计算(Spark/Flink)', '非关系型存储集群架构', '物联网边缘节点拓扑隔离', '国密级别加密算法与网络防御', '无线传感器网络协议'], career: '大数据中心高级研发科学家、企业云信息安全总负责人、工业物联网全栈总架构师。' }
+      ]);
+      const stats = reactive([
+        { label: '超算与大模型领军学术英才', target: 3850, current: 0, unit: ' 人+', color: '#22d3ee' },
+        { label: '国家核心数智技术发明特等奖', target: 104, current: 0, unit: ' 项', color: '#38bdf8' },
+        { label: '全球顶尖数智科技战略基地', target: 68, current: 0, unit: ' 家', color: '#22d3ee' },
+        { label: 'GPU异构超算机房总面积', target: 9200, current: 0, unit: ' ㎡', color: '#38bdf8' }
+      ]);
+
+      let activeDragIdx = null; let startMousePos = { x: 0, y: 0 }; let dragOffset = { x: 0, y: 0 }; let isDragged = false;
+      const startDrag = (e, idx) => {
+        activeDragIdx = idx; physicsBalls[idx].vx = 0; physicsBalls[idx].vy = 0; isDragged = false;
+        startMousePos.x = e.clientX; startMousePos.y = e.clientY;
+        dragOffset.x = e.clientX - physicsBalls[idx].x; dragOffset.y = e.clientY - physicsBalls[idx].y;
+        document.addEventListener('mousemove', handleDrag); document.addEventListener('mouseup', stopDrag);
+      };
+      const handleDrag = (e) => {
+        if (activeDragIdx !== null) {
+          physicsBalls[activeDragIdx].x = e.clientX - dragOffset.x; physicsBalls[activeDragIdx].y = e.clientY - dragOffset.y;
+          if (Math.hypot(e.clientX - startMousePos.x, e.clientY - startMousePos.y) > 5) isDragged = true;
+        }
+      };
+      const stopDrag = () => {
+        if (activeDragIdx !== null) {
+          if (!isDragged) window.open(physicsBalls[activeDragIdx].url, '_blank');
+          else { physicsBalls[activeDragIdx].vx = (Math.random() - 0.5) * 3.5; physicsBalls[activeDragIdx].vy = (Math.random() - 0.5) * 3.5; }
+        }
+        activeDragIdx = null; document.removeEventListener('mousemove', handleDrag); document.removeEventListener('mouseup', stopDrag);
+      };
+      const updatePhysics = () => {
+        const box = document.getElementById('sandbox'); if (!box) return;
+        physicsBalls.forEach((ball, idx) => {
+          if (idx === activeDragIdx) return;
+          ball.x += ball.vx; ball.y += ball.vy;
+          if (ball.x <= 10 || ball.x >= box.clientWidth - 180) ball.vx *= -1;
+          if (ball.y <= 10 || ball.y >= box.clientHeight - 180) ball.vy *= -1;
+        });
+        requestAnimationFrame(updatePhysics);
+      };
+
+      onMounted(() => {
+        updatePhysics();
+        const obs = new IntersectionObserver((el) => { if (el[0].isIntersecting) { stats.forEach(s => gsap.to(s, { current: s.target, duration: 2.2 })); } }, { threshold: 0.1 });
+        obs.observe(document.getElementById('dashboard'));
+        initSiliconNeuralMatrix();
+      });
+      return { collegeData, physicsBalls, departments, stats, startDrag };
+    }
+  }).mount('#app');
+
+  // 💻 【毕生才学倾注】：硅基晶圆总线直角数字流与高自适应 Attention 大模型神经网络交织粒子场引擎
+  function initSiliconNeuralMatrix() {
+    const canvas = document.getElementById('particle-canvas'), ctx = canvas.getContext('2d');
+    let pts = [], mouse = { x: null, y: null, radius: 220 };
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.addEventListener('resize', resize); window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; }); resize();
+
+    class HeterogeneousNode {
+      constructor() {
+        this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+        this.bx = this.x; this.by = this.y;
+        // 分裂为数字流粒子和突触权重节点
+        this.role = Math.random() > 0.5 ? 'bit' : 'synapse';
+        this.size = this.role === 'bit' ? 10 : Math.random() * 2 + 1.5;
+        this.speedX = (Math.random() - 0.5) * 0.9;
+        this.speedY = (Math.random() - 0.5) * 0.9;
+        this.char = Math.random() > 0.5 ? '1' : '0';
+      }
+      draw() {
+        const distToMouse = mouse.x != null ? Math.hypot(mouse.x - this.x, mouse.y - this.y) : 999;
+        const isNearMouse = distToMouse < mouse.radius;
+
+        // 1. 绘制传统计算机特点：流动的 0 和 1 硅基字符位
+        if(this.role === 'bit') {
+          ctx.fillStyle = isNearMouse ? 'rgba(34, 211, 238, 0.65)' : 'rgba(56, 189, 248, 0.22)';
+          ctx.font = 'bold 10px monospace';
+          ctx.fillText(this.char, this.x, this.y);
+
+          // 伴随随机极细数据总线汇编直角辅助线
+          if(Math.random() > 0.998) {
+            ctx.strokeStyle = 'rgba(34, 211, 238, 0.05)'; ctx.lineWidth = 0.5;
+            ctx.beginPath(); ctx.moveTo(this.x - 40, this.y); ctx.lineTo(this.x + 40, this.y); ctx.stroke();
+          }
+        }
+        // 2. 绘制大模型特点：自适应神经网络权重突触
+        else {
+          ctx.fillStyle = isNearMouse ? 'rgba(99, 102, 241, 0.7)' : 'rgba(139, 92, 246, 0.35)';
+          ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+
+          // 当鼠标靠近AI神经节点时，激活高阶参数遥测特征包
+          if(isNearMouse && Math.random() > 0.99) {
+            ctx.fillStyle = 'rgba(168, 85, 247, 0.4)';
+            ctx.font = '7.5px monospace';
+            ctx.fillText(`[W:${(Math.random()).toFixed(2)}]`, this.x + 10, this.y - 4);
+          }
+        }
+      }
+      update() {
+        this.x += this.speedX; this.y += this.speedY;
+        // 边界反弹
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+
+        // 3. 磁力张量力场交互：鼠标接近时，产生平滑的注意力聚类吸附
+        if (mouse.x != null && mouse.y != null) {
+          let dx = mouse.x - this.x, dy = mouse.y - this.y, dist = Math.hypot(dx, dy);
+          if (dist < mouse.radius) {
+            let force = (mouse.radius - dist) / mouse.radius;
+            // 顺滑非线性移动模拟神经网络权重更新过程
+            this.x += (dx / dist) * force * 1.2;
+            this.y += (dy / dist) * force * 1.2;
+          }
+        }
+      }
+    }
+
+    // 构建 110 个强异构多特征粒子核心
+    for(let i = 0; i < 110; i++) pts.push(new HeterogeneousNode());
+
+    function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 💎 背景底衬：微米级精密冯诺依曼硅基栅格矩阵走线（严谨、理智）
+      ctx.strokeStyle = 'rgba(34, 211, 238, 0.008)'; ctx.lineWidth = 0.6;
+      for(let g = 0; g < canvas.width; g += 65) { ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, canvas.height); ctx.stroke(); }
+      for(let g = 0; g < canvas.height; g += 65) { ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(canvas.width, g); ctx.stroke(); }
+
+      // 4. 计算突触多层自注意力分支连线（AI神经网络拓扑）
+      for(let a = 0; a < pts.length; a++){
+        for(let b = a + 1; b < pts.length; b++){
+          let dist = Math.hypot(pts[a].x - pts[b].x, pts[a].y - pts[b].y);
+          if(dist < 115) {
+            let nearMouse = mouse.x != null && Math.hypot(mouse.x - pts[a].x, mouse.y - pts[a].y) < mouse.radius;
+
+            if (nearMouse) {
+              // 受强突触信号激活：流淌出高亮冰青/神经紫交织流光
+              ctx.strokeStyle = `rgba(34, 211, 238, ${0.48 - dist/115})`;
+              ctx.lineWidth = 1.1;
+            } else {
+              // 静态常规态：冷灰色调隐层连线
+              ctx.strokeStyle = `rgba(99, 102, 241, ${0.28 - dist/115})`;
+              ctx.lineWidth = 0.6;
+            }
+            ctx.beginPath(); ctx.moveTo(pts[a].x, pts[a].y); ctx.lineTo(pts[b].x, pts[b].y); ctx.stroke();
+          }
+        }
+      }
+      pts.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(loop);
+    }
+    loop();
+  }
+</script>
+</body>
+</html>

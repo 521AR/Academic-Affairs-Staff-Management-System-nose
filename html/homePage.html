@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园枢纽 - 时空数字门户</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior: smooth; }
+
+        body {
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #01040f !important;
+            color: #f8fafc;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* 🌌 震撼：黑洞涡旋与流体星云双层大画布 */
+        #portal-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+        }
+
+        .portal-wrapper {
+            position: relative; z-index: 2; width: 100%; max-width: 1340px; margin: 0 auto; padding: 50px 24px;
+        }
+
+        /* 管理员控制台徽章 */
+        .admin-login-badge {
+            position: absolute; top: 15px; right: 24px; padding: 2px; border-radius: 30px;
+            text-decoration: none; display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.25);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+        .admin-login-badge::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent 20%, #60a5fa 50%, transparent 80%);
+            animation: rotateLaser 3s linear infinite; z-index: 1; pointer-events: none;
+        }
+        .admin-login-badge-inner {
+            position: relative; z-index: 2; display: flex; align-items: center; gap: 10px;
+            background: #0f172a; padding: 12px 24px; border-radius: 28px; color: #ffffff;
+            font-size: 0.92rem; font-weight: 700; letter-spacing: 1px;
+        }
+        .admin-login-badge i { color: #3b82f6; transition: transform 0.4s ease; }
+        .admin-login-badge-inner::after {
+            content: ''; width: 6px; height: 6px; background: #ef4444; border-radius: 50%;
+            box-shadow: 0 0 10px #ef4444; animation: pulseDot 1.2s infinite; margin-left: 4px;
+        }
+        .admin-login-badge:hover {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.45), 0 0 25px rgba(96, 165, 250, 0.6);
+        }
+
+        /* 门户主标题 */
+        .portal-header { text-align: center; margin-top: 50px; margin-bottom: 75px; }
+        .portal-header h1 {
+            font-size: 4rem; font-weight: 900; letter-spacing: 6px;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 30%, #3b82f6 70%, #00d2ff 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 22px; filter: drop-shadow(0 4px 15px rgba(59, 130, 246, 0.25));
+        }
+        .portal-header p { font-size: 1.25rem; color: #94a3b8; font-weight: 300; max-width: 750px; margin: 0 auto; line-height: 1.7; }
+
+        /* 3D全息悬浮卡片矩阵 */
+        .hologram-matrix {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px; margin-bottom: 85px;
+            perspective: 1500px;
+        }
+        .hologram-card {
+            background: rgba(10, 16, 32, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 28px;
+            padding: 50px 40px; text-align: center; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 25px 55px rgba(0, 0, 0, 0.45); position: relative; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+            transform-style: preserve-3d; transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .entry-login { --card-glow: #22d3ee; --card-glow-rgb: 34, 211, 238; }
+        .entry-register { --card-glow: #a855f7; --card-glow-rgb: 168, 85, 247; }
+        .entry-guest { --card-glow: #34d399; --card-glow-rgb: 52, 211, 153; }
+
+        .hologram-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--card-glow), transparent); opacity: 0.9;
+        }
+        .hologram-card:hover {
+            border-color: rgba(var(--card-glow-rgb), 0.55); background: rgba(10, 17, 34, 0.7);
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.65), 0 0 45px rgba(var(--card-glow-rgb), 0.35);
+        }
+
+        /* 3D 悬浮视差图标 */
+        .card-icon-wrapper {
+            width: 82px; height: 82px; border-radius: 22px;
+            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.3rem; color: var(--card-glow); margin-bottom: 30px;
+            transform: translateZ(40px);
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.01);
+            transition: transform 0.2s ease, background 0.3s, color 0.3s;
+        }
+        .hologram-card:hover .card-icon-wrapper {
+            color: #020617; background: var(--card-glow);
+            transform: translateZ(60px) scale(1.1) rotate(-6deg);
+            box-shadow: 0 0 30px var(--card-glow);
+        }
+
+        .hologram-card h2 { font-size: 1.7rem; font-weight: 800; margin-bottom: 16px; color: #f1f5f9; transform: translateZ(30px); }
+        .hologram-card p { font-size: 0.98rem; color: #94a3b8; line-height: 1.65; margin-bottom: 40px; text-align: justify; transform: translateZ(20px); }
+
+        /* 胶囊按键 */
+        .cyber-btn {
+            width: 100%; padding: 15px 0; border-radius: 16px; font-size: 1.05rem; font-weight: 600; letter-spacing: 2px;
+            text-decoration: none; display: block; position: relative; z-index: 1; overflow: hidden;
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); color: #ffffff;
+            transform: translateZ(25px); transition: all 0.4s ease;
+        }
+        .cyber-btn::before {
+            content: ''; position: absolute; top: 0; left: -150%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1); z-index: -1;
+        }
+        .hologram-card:hover .cyber-btn {
+            background: var(--card-glow); color: #020617; font-weight: 800; border-color: transparent;
+            box-shadow: 0 12px 25px rgba(var(--card-glow-rgb), 0.4); transform: translateZ(40px);
+        }
+        .hologram-card:hover .cyber-btn::before { left: 150%; }
+
+        /* 大特征面板面板 */
+        .feature-dashboard {
+            background: rgba(15, 23, 42, 0.35); border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 28px; padding: 45px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 45px;
+            backdrop-filter: blur(10px);
+        }
+        .feature-node { display: flex; gap: 22px; align-items: flex-start; }
+        .node-icon-shell {
+            width: 54px; height: 54px; border-radius: 14px; background: rgba(59, 130, 246, 0.06); border: 1px solid rgba(59, 130, 246, 0.25);
+            display: flex; align-items: center; justify-content: center; font-size: 1.35rem; color: #60a5fa; flex-shrink: 0;
+            transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .feature-node:hover .node-icon-shell { background: #3b82f6; color: #020617; box-shadow: 0 0 20px #3b82f6; transform: translateY(-3px) rotate(8deg); }
+        .node-info h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; color: #f1f5f9; }
+        .node-info p { font-size: 0.94rem; color: #64748b; line-height: 1.6; text-align: justify; }
+
+        .portal-footer { text-align: center; padding: 45px 0 25px; color: #475569; font-size: 0.9rem; letter-spacing: 1px; border-top: 1px solid rgba(255,255,255,0.02); margin-top: 65px; }
+        @keyframes rotateLaser { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes pulseDot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.6; } }
+    </style>
+</head>
+<body>
+<canvas id="portal-canvas"></canvas>
+
+<div class="portal-wrapper">
+    <a href="login.html" class="admin-login-badge">
+        <div class="admin-login-badge-inner">
+            <i class="fas fa-user-shield"></i> 核心管理员控制台
+        </div>
+    </a>
+
+    <header class="portal-header">
+        <h1>欢迎来到校园枢纽</h1>
+        <p>集结全方位高水平学术资源、前沿科研项目导航、全生命周期课程追踪与智能学生协作的多维数字空间。</p>
+    </header>
+
+    <main class="hologram-matrix">
+        <div class="hologram-card entry-login">
+            <div class="card-icon-wrapper"><i class="fas fa-sign-in-alt"></i></div>
+            <h2>智能登录</h2>
+            <p>即刻接入您的个性化数字身份系统，高效查看教研排程、个性化前沿看板以及专属学术资源池。</p>
+            <a href="UserLogin.html" class="cyber-btn">认证并登入</a>
+        </div>
+
+        <div class="hologram-card entry-register">
+            <div class="card-icon-wrapper"><i class="fas fa-user-plus"></i></div>
+            <h2>账号开通</h2>
+            <p>构建全新的高密数智节点，加入全栈式智能学术社区，开启多维学科交叉协作全新特训营。</p>
+            <a href="register.html" class="cyber-btn">创建数字档案</a>
+        </div>
+
+        <div class="hologram-card entry-guest">
+            <div class="card-icon-wrapper"><i class="fas fa-door-open"></i></div>
+            <h2>访客探秘</h2>
+            <p>免去密钥验证流程，直接以全息访客视角越级浏览公共学术数据看板并沉浸式探索各学院风采。</p>
+            <a href="index.html" class="cyber-btn">以访客身份进入</a>
+        </div>
+    </main>
+
+    <section class="feature-dashboard">
+        <div class="feature-node">
+            <div class="node-icon-shell"><i class="fas fa-book"></i></div>
+            <div class="node-info">
+                <h3>高级学术资源</h3>
+                <p>极速对接各院系核心课程大纲、多语种高级语料库以及大国智造柔性制造等顶尖教学体系资料。</p>
+            </div>
+        </div>
+        <div class="feature-node">
+            <div class="node-icon-shell"><i class="fas fa-calendar-alt"></i></div>
+            <div class="node-info">
+                <h3>前沿校园活动</h3>
+                <p>24小时不间断动态推送大型国际学术研讨会、白帽黑客大赛以及大厂实训签约演练等尖端前沿活动。</p>
+            </div>
+        </div>
+        <div class="feature-node">
+            <div class="node-icon-shell"><i class="fas fa-users"></i></div>
+            <div class="node-info">
+                <h3>高内聚学生社区</h3>
+                <p>无缝连接跨学科战队，加入敏捷开发与创意研讨小组，实现高并发、高质量的产学研项目全协同协作。</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="portal-footer">
+        <p>&copy; 2026 校园枢纽。内蒙古大学多维软件工程与网络管理联合实践项目。保留所有权利。| 专为未来极客学生设计</p>
+    </footer>
+</div>
+
+<script>
+    // ==========================================================
+    // 🌌 漫天星辰崩塌与超新星爆炸（350+多层视差节点图层）
+    // ==========================================================
+    const canvas = document.getElementById('portal-canvas'), ctx = canvas.getContext('2d');
+    let particles = [], sparks = [], mouse = { x: null, y: null, radius: 300 };
+
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.addEventListener('resize', resize);
+
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX; mouse.y = e.clientY;
+        if (Math.random() > 0.15) {
+            for(let k=0; k<2; k++) sparks.push(new PlasmaSpark(e.clientX, e.clientY));
+        }
+    });
+
+    // 💥 爆破激发器：45+颗粒子流体泼洒
+    window.addEventListener('click', (e) => {
+        for (let i = 0; i < 50; i++) sparks.push(new PlasmaSpark(e.clientX, e.clientY, true));
+    });
+    window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+    resize();
+
+    class PortalNode {
+        constructor() {
+            this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+            this.depth = Math.random();
+            if (this.depth < 0.25) {
+                this.radius = Math.random() * 3.5 + 1.8; // 背景云
+                this.vx = (Math.random() - 0.5) * 0.2; this.vy = (Math.random() - 0.5) * 0.2;
+            } else if (this.depth < 0.75) {
+                this.radius = Math.random() * 2 + 1; // 中景核心网
+                this.vx = (Math.random() - 0.5) * 0.5; this.vy = (Math.random() - 0.5) * 0.5;
+            } else {
+                this.radius = Math.random() * 0.9 + 0.3; // 高频流光
+                this.vx = (Math.random() - 0.5) * 1.3; this.vy = (Math.random() - 0.5) * 1.3;
+            }
+            this.orbitSpeed = (Math.random() * 0.02 + 0.005) * (Math.random() > 0.5 ? 1 : -1);
+            this.angle = Math.random() * Math.PI * 2;
+        }
+        draw() {
+            ctx.fillStyle = this.depth > 0.75 ? 'rgba(0, 210, 255, 0.75)' : 'rgba(96, 165, 250, 0.6)';
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fill();
+        }
+        update() {
+            this.x += this.vx; this.y += this.vy;
+            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+            // 🌀 引力黑洞对数漩涡轨迹
+            if (mouse.x != null && mouse.y != null) {
+                let dx = mouse.x - this.x, dy = mouse.y - this.y, dist = Math.hypot(dx, dy);
+                if (dist < mouse.radius) {
+                    let force = (mouse.radius - dist) / mouse.radius;
+                    this.x += (dx / dist) * force * 2.5; this.y += (dy / dist) * force * 2.5;
+                    this.x += Math.cos(this.angle) * force * 1.6; this.y += Math.sin(this.angle) * force * 1.6;
+                    this.angle += this.orbitSpeed;
+                }
+            }
+        }
+    }
+
+    class PlasmaSpark {
+        constructor(x, y, isExplosion = false) {
+            this.x = x; this.y = y;
+            const angle = Math.random() * Math.PI * 2;
+            const speed = isExplosion ? Math.random() * 6 + 3 : Math.random() * 2 + 0.5;
+            this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed - (isExplosion ? 1.2 : 0);
+            this.alpha = 1; this.gravity = 0.045;
+            this.size = Math.random() * (isExplosion ? 3.5 : 2) + 1.2;
+            this.color = Math.random() > 0.5 ? '#00d2ff' : (Math.random() > 0.5 ? '#a855f7' : '#34d399');
+        }
+        draw() {
+            ctx.save(); ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color;
+            ctx.shadowBlur = 10; ctx.shadowColor = this.color;
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+        }
+        update() { this.x += this.vx; this.y += this.vy; this.vy += this.gravity; this.alpha -= 0.022; }
+    }
+
+    // 注入大基准点阵（350节点爆发）
+    for (let i = 0; i < 350; i++) particles.push(new PortalNode());
+
+    function animateLoop() {
+        // 🎯 长曝光长色层微弱遮罩，提供柔和流线星轨
+        ctx.fillStyle = 'rgba(1, 4, 15, 0.14)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let a = 0; a < particles.length; a++) {
+            if (particles[a].depth < 0.25 || particles[a].depth > 0.75) continue;
+            for (let b = a + 1; b < particles.length; b++) {
+                if (particles[b].depth < 0.25 || particles[b].depth > 0.75) continue;
+                let dist = Math.hypot(particles[a].x - particles[b].x, particles[a].y - particles[b].y);
+                if (dist < 120) {
+                    ctx.strokeStyle = `rgba(96, 165, 250, ${0.18 - dist / 120})`; ctx.lineWidth = 0.6;
+                    ctx.beginPath(); ctx.moveTo(particles[a].x, particles[a].y); ctx.lineTo(particles[b].x, particles[b].y); ctx.stroke();
+                }
+            }
+        }
+        particles.forEach(p => { p.update(); p.draw(); });
+        for (let i = sparks.length - 1; i >= 0; i--) {
+            sparks[i].update();
+            if (sparks[i].alpha <= 0) { sparks.splice(i, 1); } else { sparks[i].draw(); }
+        }
+        requestAnimationFrame(animateLoop);
+    }
+    animateLoop();
+
+    // ==========================================================
+    // 2. 硬件加速阻尼级 3D 空间全息几何视差偏转
+    // ==========================================================
+    document.querySelectorAll('.hologram-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left, y = e.clientY - rect.top;
+            const xc = rect.width / 2, yc = rect.height / 2;
+            const tiltX = (yc - y) / 7.5, tiltY = (x - xc) / 7.5;
+            card.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-10px)`;
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = `perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(0px)`;
+        });
+    });
+</script>
+</body>
+</html>

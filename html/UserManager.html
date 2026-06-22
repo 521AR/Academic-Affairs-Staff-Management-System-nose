@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理系统</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            padding: 30px 15px;
+        }
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* 工具栏区域 */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* 统一输入框样式 */
+        input[type="text"], input[type="email"], input[type="password"] {
+            padding: 9px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #334155;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        /* 统一按钮样式系统 */
+        button {
+            padding: 9px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-primary { background-color: #3b82f6; color: white; }
+        .btn-primary:hover { background-color: #2563eb; }
+
+        .btn-secondary { background-color: #64748b; color: white; }
+        .btn-secondary:hover { background-color: #475569; }
+
+        .btn-success { background-color: #10b981; color: white; }
+        .btn-success:hover { background-color: #059669; }
+
+        .btn-danger { background-color: #ef4444; color: white; }
+        .btn-danger:hover { background-color: #dc2626; }
+
+        .btn-warning { background-color: #f59e0b; color: white; }
+        .btn-warning:hover { background-color: #d97706; }
+
+        /* 表格样式 */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        .row-actions button {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        /* 模态框底层遮罩 */
+        .modal-mask {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* 模态框主体 */
+        .modal-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+        .form-item {
+            margin-bottom: 16px;
+        }
+        .form-item label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+        .form-item input {
+            width: 100%;
+        }
+        .error-tip {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            min-height: 16px;
+        }
+        .modal-footer {
+            text-align: right;
+            margin-top: 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Vue 动画效果 */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter, .fade-leave-to {
+            opacity: 0;
+        }
+        .fade-enter-active .modal-container, .fade-leave-active .modal-container {
+            transition: transform 0.3s ease;
+        }
+        .fade-enter .modal-container, .fade-leave-to .modal-container {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="container">
+    <h1>用户管理系统</h1>
+
+    <div class="toolbar">
+        <div class="action-btns">
+            <button class="btn-primary" @click="showCreateForm">创建新用户</button>
+            <button class="btn-secondary" @click="loadAllUsers" style="margin-left: 8px;">刷新数据</button>
+        </div>
+
+        <div class="search-box">
+            <input type="text" v-model.trim="searchEmail" placeholder="输入邮箱搜索用户">
+            <button class="btn-primary" @click="searchByEmail">搜索</button>
+
+            <input type="text" v-model.trim="searchId" placeholder="输入用户ID搜索" style="margin-left: 10px;">
+            <button class="btn-primary" @click="searchById">搜索</button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+            <tr>
+                <th>用户ID</th>
+                <th>昵称</th>
+                <th>邮箱</th>
+                <th>手机号</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="user in userList" :key="user.userId">
+                <td>{{ user.userId }}</td>
+                <td>{{ user.nickname }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.phone || '—' }}</td>
+                <td class="row-actions">
+                    <button class="btn-success" @click="editUser(user)">编辑</button>
+                    <button class="btn-danger" @click="deleteUser(user.userId)">删除</button>
+                    <button class="btn-warning" @click="resetPassword(user.userId)">重置密码</button>
+                </td>
+            </tr>
+            <tr v-if="userList.length === 0">
+                <td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">暂无用户数据</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <transition name="fade">
+        <div class="modal-mask" v-if="showModal">
+            <div class="modal-container">
+                <div class="modal-header">{{ modalTitle }}</div>
+                <form @submit.prevent="submitForm">
+                    <div class="form-item">
+                        <label>用户ID:</label>
+                        <input type="text" v-model="form.userId" :disabled="isEdit" placeholder="3-20位字母/数字/下划线">
+                        <div class="error-tip">{{ errors.userId }}</div>
+                    </div>
+                    <div class="form-item">
+                        <label>昵称:</label>
+                        <input type="text" v-model="form.nickname" placeholder="请输入用户昵称">
+                        <div class="error-tip">{{ errors.nickname }}</div>
+                    </div>
+                    <div class="form-item">
+                        <label>邮箱:</label>
+                        <input type="email" v-model="form.email" placeholder="example@domain.com">
+                        <div class="error-tip">{{ errors.email }}</div>
+                    </div>
+                    <div class="form-item">
+                        <label>手机号:</label>
+                        <input type="text" v-model="form.phone" placeholder="可选，11位手机号">
+                        <div class="error-tip">{{ errors.phone }}</div>
+                    </div>
+                    <div class="form-item">
+                        <label>密码:</label>
+                        <input type="password" v-model="form.password" placeholder="至少6位密码">
+                        <div class="error-tip">{{ errors.password }}</div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" @click="closeModal">取消</button>
+                        <button type="submit" class="btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </transition>
+</div>
+
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                API_BASE_URL: 'http://localhost:8080/users',
+                userList: [],
+                searchEmail: '',
+                searchId: '',
+                showModal: false,
+                modalTitle: '创建用户',
+                isEdit: false,
+                form: {
+                    userId: '',
+                    nickname: '',
+                    email: '',
+                    phone: '',
+                    password: ''
+                },
+                errors: {
+                    userId: '',
+                    nickname: '',
+                    email: '',
+                    phone: '',
+                    password: ''
+                }
+            }
+        },
+        mounted() {
+            this.loadAllUsers();
+        },
+        methods: {
+            getAuthHeader() {
+                const token = localStorage.getItem('jwt_token');
+                return { 'Authorization': 'Bearer ' + token };
+            },
+            loadAllUsers() {
+                axios.get(`${this.API_BASE_URL}/getAllUser`, { headers: this.getAuthHeader() })
+                    .then(res => {
+                        this.userList = res.data || [];
+                    })
+                    .catch(err => {
+                        console.error('获取用户列表失败:', err);
+                        alert('获取用户列表失败');
+                    });
+            },
+            showCreateForm() {
+                this.modalTitle = '创建用户';
+                this.isEdit = false;
+                this.resetForm();
+                this.clearErrors();
+                this.showModal = true;
+            },
+            editUser(user) {
+                this.modalTitle = '编辑用户';
+                this.isEdit = true;
+                this.clearErrors();
+                this.form = { ...user }; // 浅拷贝，防止直接修改表格行数据
+                this.showModal = true;
+            },
+            closeModal() {
+                this.showModal = false;
+            },
+            resetForm() {
+                this.form = { userId: '', nickname: '', email: '', phone: '', password: '' };
+            },
+            clearErrors() {
+                this.errors = { userId: '', nickname: '', email: '', phone: '', password: '' };
+            },
+            validateForm() {
+                this.clearErrors();
+                let isValid = true;
+
+                if (!/^[a-zA-Z0-9_]{3,20}$/.test(this.form.userId)) {
+                    this.errors.userId = '用户ID须为3-20位字母、数字或下划线';
+                    isValid = false;
+                }
+                if (!this.form.nickname.trim()) {
+                    this.errors.nickname = '昵称不能为空';
+                    isValid = false;
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+                    this.errors.email = '邮箱格式不正确';
+                    isValid = false;
+                }
+                if (this.form.phone && !/^1[3-9]\d{9}$/.test(this.form.phone)) {
+                    this.errors.phone = '手机号格式不正确';
+                    isValid = false;
+                }
+                if (!this.form.password || this.form.password.length < 6) {
+                    this.errors.password = '密码至少需要6位';
+                    isValid = false;
+                }
+                return isValid;
+            },
+            submitForm() {
+                if (!this.validateForm()) return;
+
+                if (this.isEdit) {
+                    // 更新用户
+                    axios.put(`${this.API_BASE_URL}/updateUser/${this.form.userId}`, this.form, { headers: this.getAuthHeader() })
+                        .then(() => {
+                            this.closeModal();
+                            this.loadAllUsers();
+                            alert('用户更新成功');
+                        })
+                        .catch(err => {
+                            console.error('更新用户失败:', err);
+                            alert('更新用户失败');
+                        });
+                } else {
+                    // 创建用户
+                    axios.post(`${this.API_BASE_URL}/creatUser`, this.form, { headers: this.getAuthHeader() })
+                        .then(() => {
+                            this.closeModal();
+                            this.loadAllUsers();
+                            alert('用户创建成功');
+                        })
+                        .catch(err => {
+                            console.error('创建用户失败:', err);
+                            alert('创建用户失败');
+                        });
+                }
+            },
+            deleteUser(userId) {
+                if (confirm('确定要删除这个用户吗？')) {
+                    axios.delete(`${this.API_BASE_URL}/deleteUser/${userId}`, { headers: this.getAuthHeader() })
+                        .then(() => {
+                            this.loadAllUsers();
+                            alert('用户删除成功');
+                        })
+                        .catch(err => {
+                            console.error('删除用户失败:', err);
+                            alert('删除用户失败');
+                        });
+                }
+            },
+            resetPassword(userId) {
+                if (confirm('确定要重置该用户密码吗？重置后密码将变为123456')) {
+                    axios.put(`${this.API_BASE_URL}/reset-password/${userId}`, {}, { headers: this.getAuthHeader() })
+                        .then(() => {
+                            alert('密码重置成功');
+                        })
+                        .catch(err => {
+                            console.error('重置密码失败:', err);
+                            alert('重置密码失败');
+                        });
+                }
+            },
+            searchByEmail() {
+                if (!this.searchEmail) { alert('请输入邮箱地址'); return; }
+                axios.get(`${this.API_BASE_URL}/email/${this.searchEmail}`, { headers: this.getAuthHeader() })
+                    .then(res => {
+                        this.userList = res.data ? [res.data] : [];
+                    })
+                    .catch(() => {
+                        alert('未找到该邮箱对应的用户');
+                        this.loadAllUsers();
+                    });
+            },
+            searchById() {
+                if (!this.searchId) { alert('请输入用户ID'); return; }
+                axios.get(`${this.API_BASE_URL}/searchUser/${this.searchId}`, { headers: this.getAuthHeader() })
+                    .then(res => {
+                        this.userList = res.data ? [res.data] : [];
+                    })
+                    .catch(() => {
+                        alert('未找到该ID对应的用户');
+                        this.loadAllUsers();
+                    });
+            }
+        }
+    });
+</script>
+</body>
+</html>

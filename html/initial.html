@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园平台 - 智慧核心初始化</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #020617 !important;
+            color: #ffffff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1500px;
+        }
+
+        /* 🌌 升级：超大体量流体拖尾星空画布 */
+        #boot-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+        }
+
+        :root {
+            --cyber-glow: #22d3ee;
+            --cyber-blue: #3b82f6;
+        }
+
+        /* 左上角极客指令流 */
+        .boot-logs {
+            position: fixed; top: 25px; left: 25px; z-index: 10;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.8rem; color: #475569; line-height: 1.6;
+            pointer-events: none; text-align: left;
+        }
+        .boot-logs span { display: block; white-space: nowrap; opacity: 0; animation: logFade 4s forwards; }
+        .boot-logs span:nth-child(1) { animation-delay: 0.2s; }
+        .boot-logs span:nth-child(2) { animation-delay: 0.6s; color: var(--cyber-glow); }
+        .boot-logs span:nth-child(3) { animation-delay: 1.0s; }
+        .boot-logs span:nth-child(4) { animation-delay: 1.4s; color: #34d399; }
+
+        /* 开屏自检加载动画舱 */
+        .boot-loader-screen {
+            position: fixed; inset: 0; z-index: 100;
+            background: #020512;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s ease;
+        }
+        .boot-loader-screen.loaded {
+            opacity: 0; pointer-events: none; transform: scale(1.08);
+        }
+
+        .loader-hologram-circle {
+            position: relative; width: 170px; height: 170px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 30px;
+        }
+        .loader-ring {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--cyber-glow);
+            border-bottom-color: var(--cyber-blue);
+            animation: ringRotate 1.2s linear infinite;
+            filter: drop-shadow(0 0 10px var(--cyber-glow));
+        }
+        .loader-ring-inner {
+            position: absolute; inset: 14px; border-radius: 50%;
+            border: 1.5px solid transparent;
+            border-left-color: #a855f7; border-right-color: var(--cyber-glow);
+            animation: ringRotateReverse 1.8s linear infinite; opacity: 0.7;
+        }
+        .loader-logo {
+            font-size: 3rem; color: #ffffff;
+            text-shadow: 0 0 25px var(--cyber-glow);
+            animation: logoPulse 1.2s ease-in-out infinite;
+        }
+        .loader-counter {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 2rem; font-weight: 900; color: #ffffff;
+            letter-spacing: 2px; text-shadow: 0 0 15px var(--cyber-blue);
+        }
+        .loader-status-text {
+            font-size: 0.85rem; color: #4b5563; letter-spacing: 3px; text-transform: uppercase; margin-top: 12px;
+            font-weight: bold;
+        }
+
+        /* 激活解锁后的主内容舞台 */
+        .portal-content {
+            position: relative; z-index: 2; text-align: center;
+            max-width: 950px; padding: 0 20px;
+            opacity: 0; transform: translateY(40px) translateZ(-50px);
+            transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .portal-content.active {
+            opacity: 1; transform: translateY(0) translateZ(0);
+        }
+
+        .main-logo-shell {
+            width: 110px; height: 110px; border-radius: 32px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(34, 211, 238, 0.35);
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 3.2rem; color: var(--cyber-glow);
+            margin-bottom: 25px;
+            box-shadow: 0 0 30px rgba(34, 211, 238, 0.2), inset 0 0 15px rgba(34, 211, 238, 0.15);
+            animation: floatGlow 4s ease-in-out infinite;
+        }
+
+        h1 {
+            font-size: 3.8rem; font-weight: 900; letter-spacing: 6px;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 40%, #22d3ee 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 20px; filter: drop-shadow(0 4px 15px rgba(0,0,0,0.6));
+        }
+        .subtitle {
+            font-size: 1.2rem; color: #94a3b8; font-weight: 300; line-height: 1.7;
+            letter-spacing: 1.5px; margin-bottom: 45px;
+        }
+
+        /* 破壁进入键 */
+        .enter-btn {
+            display: inline-flex; align-items: center; gap: 12px;
+            padding: 18px 48px; border-radius: 35px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff; text-decoration: none;
+            font-size: 1.15rem; font-weight: 700; letter-spacing: 2px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            position: relative; overflow: hidden; z-index: 1;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .enter-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            transition: all 0.6s ease; z-index: -1;
+        }
+        .enter-btn:hover {
+            background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%);
+            color: #020617; border-color: transparent;
+            box-shadow: 0 0 35px rgba(34, 211, 238, 0.5);
+            transform: translateY(-3px) scale(1.04);
+        }
+        .enter-btn:hover ::before { left: 100%; }
+
+        /* 遥测传感器特色面板 */
+        .features-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+            max-width: 840px; margin: 60px auto 0;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 18px; padding: 24px 15px;
+            backdrop-filter: blur(8px);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .feature-card-icon { font-size: 1.5rem; color: #475569; margin-bottom: 12px; transition: color 0.3s; }
+        .feature-card-text { font-size: 0.92rem; color: #475569; font-weight: 600; letter-spacing: 0.5px; transition: color 0.3s; }
+
+        .portal-content.active .feature-card { border-color: rgba(34, 211, 238, 0.12); background: rgba(15, 23, 42, 0.35); }
+        .portal-content.active .feature-card:hover {
+            border-color: #22d3ee; transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 25px rgba(34, 211, 238, 0.15);
+        }
+        .portal-content.active .feature-card:hover .feature-card-icon { color: #22d3ee; text-shadow: 0 0 15px #22d3ee; }
+        .portal-content.active .feature-card:hover .feature-card-text { color: #ffffff; }
+
+        @keyframes ringRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes ringRotateReverse { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
+        @keyframes logoPulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.04); opacity: 1; } }
+        @keyframes floatGlow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); border-color: #3b82f6; } }
+        @keyframes logFade { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
+</head>
+<body>
+<canvas id="boot-canvas"></canvas>
+
+<div class="boot-logs">
+    <span>[SYSTEM] Initializing EduBrain telemetry matrix...</span>
+    <span>[SYSTEM] Connecting core node to localhost:8080... [CONNECTED]</span>
+    <span>[SYSTEM] Synced database clusters successfully.</span>
+    <span>[SYSTEM] All modules check: SECURE/READY.</span>
+</div>
+
+<div class="boot-loader-screen" id="loader-panel">
+    <div class="loader-hologram-circle">
+        <div class="loader-ring"></div>
+        <div class="loader-ring-inner"></div>
+        <div class="loader-logo"><i class="fas fa-graduation-cap"></i></div>
+    </div>
+    <div class="loader-counter" id="load-num">0%</div>
+    <div class="loader-status-text" id="load-status">System Initializing...</div>
+</div>
+
+<div class="portal-content" id="portal-panel">
+    <div class="main-logo-shell"><i class="fas fa-graduation-cap"></i></div>
+    <h1>校园智慧平台</h1>
+    <p class="subtitle">连接知识与未来<br>打造智能化校园生活体验 · 数字化大厅控制台入口</p>
+
+    <a href="homePage.html" class="enter-btn">
+        <i class="fas fa-arrow-right"></i> 解锁进入控制台
+    </a>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-card-icon"><i class="fas fa-book"></i></div>
+            <div class="feature-card-text">在线学习</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-card-icon"><i class="fas fa-users"></i></div>
+            <div class="feature-card-text">社交互动</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-card-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div class="feature-card-text">活动管理</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-card-icon"><i class="fas fa-bell"></i></div>
+            <div class="feature-card-text">即时通知</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadNum = document.getElementById('load-num'), loadStatus = document.getElementById('load-status');
+        const loaderPanel = document.getElementById('loader-panel'), portalPanel = document.getElementById('portal-panel');
+        let progress = 0;
+        const phrases = ["Loading neural core...", "Syncing architecture maps...", "Allocating cache blocks...", "Configuring secure gateway...", "System online."];
+
+        function runBoot() {
+            progress += Math.floor(Math.random() * 5) + 2;
+            if (progress >= 100) {
+                progress = 100; loadNum.innerText = "100%"; loadStatus.innerText = "BOOT SUCCESS";
+                setTimeout(() => { loaderPanel.classList.add('loaded'); portalPanel.classList.add('active'); }, 350);
+            } else {
+                loadNum.innerText = progress + "%";
+                loadStatus.innerText = phrases[Math.floor(progress / 25)] || "Loading...";
+                setTimeout(runBoot, Math.floor(Math.random() * 60) + 20);
+            }
+        }
+        setTimeout(runBoot, 500);
+    });
+
+    // 🪐 升级版：高阶长曝光液体星轨引擎
+    const canvas = document.getElementById('boot-canvas'), ctx = canvas.getContext('2d');
+    let pts = [], mouse = { x: null, y: null, radius: 200 };
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.addEventListener('resize', resize);
+    window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+    resize();
+
+    class SparkNode {
+        constructor() {
+            this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 0.4; this.vy = (Math.random() - 0.5) * 0.4;
+            this.size = Math.random() * 2 + 1;
+        }
+        draw() {
+            ctx.fillStyle = 'rgba(34, 211, 238, 0.6)';
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+        }
+        update() {
+            this.x += this.vx; this.y += this.vy;
+            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            if (mouse.x != null && mouse.y != null) {
+                let dx = mouse.x - this.x, dy = mouse.y - this.y, dist = Math.hypot(dx, dy);
+                if (dist < mouse.radius) {
+                    let force = (mouse.radius - dist) / mouse.radius;
+                    this.x += (dx / dist) * force * 1.5; this.y += (dy / dist) * force * 1.5;
+                }
+            }
+        }
+    }
+    for (let i = 0; i < 80; i++) pts.push(new SparkNode());
+
+    function frame() {
+        ctx.fillStyle = 'rgba(2, 5, 18, 0.14)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let a = 0; a < pts.length; a++) {
+            for (let b = a + 1; b < pts.length; b++) {
+                let dist = Math.hypot(pts[a].x - pts[b].x, pts[a].y - pts[b].y);
+                if (dist < 125) {
+                    ctx.strokeStyle = `rgba(59, 130, 246, ${0.18 - dist / 125})`; ctx.lineWidth = 0.6;
+                    ctx.beginPath(); ctx.moveTo(pts[a].x, pts[a].y); ctx.lineTo(pts[b].x, pts[b].y); ctx.stroke();
+                }
+            }
+        }
+        pts.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(frame);
+    }
+    frame();
+</script>
+</body>
+</html>

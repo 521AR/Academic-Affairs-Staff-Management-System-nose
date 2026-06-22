@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工学院 - 工业智造空间</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior: smooth; }
+
+        /* 💎 全局顶奢美学：高精尖数控重工深海钛钢背景 */
+        body {
+            font-family: "Consolas", "JetBrains Mono", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            background: #060913 !important; color: #e2e8f0; overflow-x: hidden;
+        }
+
+        /* ⚙️ 专属数字孪生精密 CAD 测绘图纸画布 */
+        #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.42; }
+        .container { position: relative; z-index: 2; width: 100%; padding: 60px 140px 60px 60px; }
+
+        /* 🔒 全息战术工业控制台侧边挂靠栏 */
+        .sidebar-dock {
+            position: fixed !important; right: 35px !important; top: 50% !important; transform: translateY(-50%) !important;
+            background: rgba(10, 16, 32, 0.8) !important; border: 1px solid rgba(255, 69, 0, 0.35) !important;
+            backdrop-filter: blur(30px) !important; -webkit-backdrop-filter: blur(30px) !important;
+            padding: 26px 14px !important; border-radius: 20px !important;
+            display: flex !important; flex-direction: column !important; gap: 24px !important;
+            z-index: 999999 !important;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), inset 0 0 20px rgba(255, 69, 0, 0.08) !important;
+        }
+        .dock-item {
+            width: 44px; height: 44px; border-radius: 10px; background: rgba(255,255,255,0.01);
+            display: flex; align-items: center; justify-content: center; color: #475569;
+            text-decoration: none; font-size: 1.15rem; transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1); position: relative;
+            border: 1px solid rgba(255,255,255,0.02);
+        }
+        .dock-item span {
+            position: absolute; right: 65px; background: #070b14; color: #ff5500;
+            padding: 8px 18px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;
+            white-space: nowrap; opacity: 0; pointer-events: none; transform: translateX(15px); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(255, 69, 0, 0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            letter-spacing: 1px;
+        }
+        .dock-item:hover span { opacity: 1; transform: translateX(0); }
+        .dock-item:hover { background: rgba(255, 69, 0, 0.12); color: #ff5500; border-color: #ff5500; transform: scale(1.1); }
+
+        /* 返回大厅重装质感磁力核 */
+        .dock-item.global-btn {
+            background: linear-gradient(135deg, #ff2a00, #ff8c00); color: #ffffff !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            box-shadow: 0 0 18px #ff2a00, inset 0 0 8px rgba(255,255,255,0.3);
+            animation: industrialPulse 3s infinite ease-in-out;
+        }
+        .dock-item.global-btn span { background: #040710; color: #ff8c00; border-color: #ff8c00; }
+        @keyframes industrialPulse {
+            0%, 100% { box-shadow: 0 0 15px #ff2a00; transform: scale(1); }
+            50% { box-shadow: 0 0 30px #ff8c00, 0 0 10px #ff2a00; transform: scale(1.05); }
+        }
+
+        /* Hero 工业智能穹顶巨幕区 */
+        .hero { height: 50vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; }
+        .hero-title {
+            font-size: 5.5rem; font-weight: 900; background: linear-gradient(180deg, #ffffff 20%, #ff4500 75%, #ffae00 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 16px;
+            filter: drop-shadow(0 0 45px rgba(255, 69, 0, 0.35)); font-family: system-ui;
+        }
+        .hero-subtitle { font-size: 1.25rem; color: #475569; margin-top: 26px; font-weight: 700; letter-spacing: 8px; text-transform: uppercase; display: flex; align-items: center; gap: 15px; }
+        .hero-subtitle::before, .hero-subtitle::after { content: ''; display: inline-block; width: 60px; height: 1px; background: rgba(255, 69, 0, 0.3); }
+
+        /* 学院简介舱 */
+        .intro-section { padding: 50px 0; max-width: 1000px; margin: 0 auto; text-align: center; }
+        .section-title { font-size: 2rem; margin-bottom: 50px; color: #ffffff; font-weight: 800; letter-spacing: 3px; position: relative; display: inline-block; text-transform: uppercase; }
+        .section-title::after { content:''; position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%); width: 35px; height: 3px; background: #ff4500; box-shadow: 0 0 15px #ff4500; }
+        .intro-text { font-size: 1.12rem; color: #8da2bb; line-height: 2.1; margin-bottom: 24px; text-align: justify; text-justify: inter-word; }
+
+        /* 机械仿真实体动态沙盒区 */
+        .physics-section { padding: 50px 0; text-align: center; }
+        .physics-container {
+            width: 100%; max-width: 1120px; height: 500px; margin: 0 auto; position: relative; border-radius: 24px; overflow: hidden;
+            background: rgba(8, 12, 24, 0.45); border: 1px solid rgba(255, 255, 255, 0.04); backdrop-filter: blur(30px);
+            box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.9), 0 30px 60px rgba(0,0,0,0.6);
+        }
+        /* 物理沙盒块：重工业全息机载仪表盘卡片 */
+        .physics-ball {
+            position: absolute; width: 165px; height: 165px; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-weight: 700; font-size: 0.85rem; color: #94a3b8; cursor: grab; padding: 20px; text-align: center;
+            background: rgba(13, 20, 38, 0.85); border: 1px solid rgba(255, 69, 0, 0.25);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(255, 69, 0, 0.05); transition: border-color 0.3s, color 0.3s, box-shadow 0.3s;
+        }
+        .physics-ball::before {
+            content: 'SYS-RECON'; position: absolute; top: 8px; left: 12px; font-size: 9px; color: #475569; font-family: monospace; letter-spacing: 0.5px;
+        }
+        .physics-ball:hover { border-color: #00d2ff; color: #ffffff; box-shadow: 0 0 30px rgba(0, 210, 255, 0.3); background: rgba(0, 210, 255, 0.03); }
+        .physics-ball i { font-size: 1.8rem; margin-bottom: 14px; color: #ff4500; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        .physics-ball:hover i { transform: scale(1.15) rotate(90deg); color: #00d2ff; }
+
+        /* 专业架构重工模块矩阵线框设计 */
+        .departments { padding: 50px 0; max-width: 1150px; margin: 0 auto; }
+        .department-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 35px; }
+
+        .department-card {
+            background: rgba(10, 16, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 20px;
+            padding: 40px 35px; cursor: pointer; backdrop-filter: blur(15px); transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative; overflow: hidden;
+        }
+        /* 四角精密 CAD 刻度对齐指示标志 */
+        .department-card::before {
+            content: ''; position: absolute; top: 15px; left: 15px; width: 10px; height: 10px; border-top: 1px solid #ff4500; border-left: 1px solid #ff4500; opacity: 0.3; transition: all 0.3s;
+        }
+        .department-card::after {
+            content: 'MECH-ENG-STRUCT'; position: absolute; bottom: 12px; right: 20px; font-size: 9px; color: rgba(255,255,255,0.05); font-family: monospace; letter-spacing: 1px;
+        }
+        .department-card:hover::before { width: 25px; height: 25px; opacity: 1; border-color: #00d2ff; }
+        .department-card:hover { transform: translateY(-8px); border-color: rgba(0, 210, 255, 0.3); background: rgba(11, 20, 38, 0.65); box-shadow: 0 30px 60px rgba(0,0,0,0.7); }
+
+        .dept-header { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
+        .dept-icon { width: 50px; height: 50px; border-radius: 12px; background: rgba(255, 69, 0, 0.05); display: flex; align-items: center; justify-content: center; color: #ff4500; font-size: 1.4rem; border: 1px solid rgba(255, 69, 0, 0.15); transition: all 0.3s; }
+        .department-card:hover .dept-icon { color: #00d2ff; border-color: rgba(0, 210, 255, 0.3); background: rgba(0, 210, 255, 0.05); }
+        .department-card h3 { font-size: 1.2rem; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; }
+
+        /* 卡片内风琴手风琴受力装配层 */
+        .dept-expanded-content { margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; animation: industrialSlide 0.45s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .dept-expanded-content ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+        .dept-expanded-content li { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); padding: 5px 14px; border-radius: 4px; font-size: 0.8rem; color: #ffae00; font-family: monospace; letter-spacing: 0.5px; }
+
+        /* 核心学术导向链接舱 */
+        .academic-section { padding: 50px 0; max-width: 1150px; margin: 0 auto; }
+        .academic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
+        .academic-card {
+            background: rgba(11, 18, 32, 0.5); border: 1px solid rgba(255,255,255,0.02); border-radius: 16px; padding: 32px 24px;
+            text-align: center; text-decoration: none; color: inherit; transition: all 0.35s ease; display: block; position: relative;
+        }
+        .academic-card:hover { border-color: #ffae00; background: rgba(255, 69, 0, 0.02); transform: translateY(-6px); box-shadow: 0 20px 45px rgba(255, 69, 0, 0.08); }
+        .academic-card i { font-size: 2rem; color: #ff4500; margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(255, 69, 0, 0.25)); }
+        .academic-card h3 { font-size: 1.05rem; color: #ffffff; margin-bottom: 12px; font-weight: 700; }
+        .academic-card p { font-size: 0.85rem; color: #5a6e85; line-height: 1.65; text-align: justify; }
+
+        /* 数字化硬核实力成就看板 */
+        .dashboard-section { padding: 50px 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 35px; max-width: 1150px; margin: 0 auto; }
+        .stat-card { background: rgba(255, 255, 255, 0.005); border: 1px solid rgba(255, 255, 255, 0.02); padding: 50px 30px; border-radius: 20px; text-align: center; box-shadow: inset 0 0 30px rgba(0,0,0,0.2); }
+        .stat-number { font-size: 3.4rem; font-weight: 800; color: #ff4500; margin-bottom: 14px; text-shadow: 0 0 35px rgba(255, 69, 0, 0.4); font-family: system-ui; }
+
+        @keyframes industrialSlide { from { opacity: 0; transform: translateY(12px) scaleY(0.96); } to { opacity: 1; transform: translateY(0) scaleY(1); } }
+        footer { text-align: center; padding: 100px 0 40px; color: #2d3b4f; font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.01); font-family: monospace; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+
+<nav class="sidebar-dock">
+    <a href="javascript:void(0)" onclick="window.top.location.href='../index.html'" class="dock-item global-btn" title="返回大厅系统"><i class="fas fa-globe"></i><span>返回大厅中枢</span></a>
+    <a href="#intro" class="dock-item" title="学院概况"><i class="fas fa-industry"></i><span>学院概况</span></a>
+    <a href="#sandbox" class="dock-item" title="大国智造名片"><i class="fas fa-microscope"></i><span>大国智造名片</span></a>
+    <a href="#departments" class="dock-item" title="专业设置"><i class="fas fa-tools"></i><span>专业设置架构</span></a>
+    <a href="#academic" class="dock-item" title="核心学术资源"><i class="fas fa-project-diagram"></i><span>公共学术向导</span></a>
+    <a href="#dashboard" class="dock-item" title="科研成就看板"><i class="fas fa-medal"></i><span>科研成就看板</span></a>
+</nav>
+
+<div id="app" class="container">
+    <section class="hero" id="intro">
+        <h1 class="hero-title">{{ collegeData.title }}</h1>
+        <p class="hero-subtitle">大国重器·工业制造与非线性动力学闭环拓扑</p>
+    </section>
+
+    <section class="intro-section">
+        <h2 class="section-title">学院概况</h2>
+        <p class="intro-text">工学院深度结合现代工业信息化、多物理场耦合仿真与精密工业4.0底座架构，致力于培养拥有卓越跨国学术视野、扎实机械电子工程结构底蕴以及工业级人工智能边缘计算协同能力的高阶硬核领军人才。学院建有国内一流的超精密柔性组合加工中心、多轴机器人协作空间、以及虚拟数字孪生协同仿真实验室，并与50多家国际工程巨头深度构建全面产学研一体化基地，大力驱动中国制造向绿色环保、高自适应、高敏捷转型的科技最前沿。</p>
+    </section>
+
+    <section class="physics-section">
+        <h2 class="section-title">大国智造名片</h2>
+        <p style="color: #475569; margin-bottom: 30px; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.5px;">⚙️ 全息遥测：<b>点击或随意拖拽全息动力学单元</b>可解构各子专业的尖端研究成果报告与全球专利。自带多维物理场约束碰撞算法。</p>
+        <div class="physics-container" id="sandbox">
+            <div v-for="(ball, idx) in physicsBalls" :key="idx" class="physics-ball" :style="{ left: ball.x + 'px', top: ball.y + 'px' }" @mousedown="startDrag($event, idx)">
+                <i :class="ball.icon"></i><span>{{ ball.text }}</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="departments" id="departments">
+        <h2 class="section-title">专业设置架构</h2>
+        <div class="department-grid">
+            <div v-for="(dept, i) in departments" :key="i" class="department-card" @click="dept.expanded = !dept.expanded">
+                <div class="dept-header">
+                    <div class="dept-icon"><i :class="dept.icon"></i></div>
+                    <h3>{{ dept.name }}</h3>
+                </div>
+                <p class="intro-text" style="font-size:0.9rem; color:#5a6e85; margin-bottom:0; line-height: 1.65;">{{ dept.summary }}</p>
+                <div v-if="dept.expanded" class="dept-expanded-content">
+                    <p style="color: #8da2bb; line-height: 1.75; font-size: 0.9rem; text-align: justify;">{{ dept.details }}</p>
+                    <h4 style="color:#ff4500; margin-top:20px; font-size:0.9rem; font-weight: 700; text-transform: uppercase;"><i class="fas fa-microchip"></i> 重工科研核心专业群体系</h4>
+                    <ul><li v-for="c in dept.courses">{{ c }}</li></ul>
+                    <p style="font-size:0.88rem; color:#ffae00; margin-top:18px; font-weight:600;"><i class="fas fa-location-arrow"></i> 核心战略产业流向去处：<span style="color:#cbd5e1; font-weight: 500; font-family: sans-serif;">{{ dept.career }}</span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="academic-section" id="academic">
+        <h2 class="section-title">工业生态与全球公共学术向导</h2>
+        <div class="academic-grid">
+            <a href="https://www.engineeringvillage.com" target="_blank" class="academic-card">
+                <i class="fas fa-database"></i>
+                <h3>Engineering Village (EI)</h3>
+                <p>全球最具权威的工程科学文献文摘索引数据库，深度挖掘超精密数控制造、复杂机电控制高阶论文。</p>
+            </a>
+            <a href="https://www.sciencedirect.com" target="_blank" class="academic-card">
+                <i class="fas fa-server"></i>
+                <h3>ScienceDirect 工程文库</h3>
+                <p>Elsevier 旗下全球顶尖工程材料期刊文库，涵盖前沿复杂金属功能材料、多相流体力学领域核心核心期刊。</p>
+            </a>
+            <a href="https://www.asme.org" target="_blank" class="academic-card">
+                <i class="fas fa-wrench"></i>
+                <h3>ASME Digital Collection</h3>
+                <p>美国机械工程师学会核心数据汇编，提供全球最严苛的国际工业制造标准规程与机构学动力学前沿著作。</p>
+            </a>
+            <a href="https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=70" target="_blank" class="academic-card">
+                <i class="fas fa-charging-station"></i>
+                <h3>IEEE T-RO Robotics</h3>
+                <p>IEEE 顶级机器人与工业智能自动化特种汇刊，精确回溯智能人形无人装备与全闭环运动学传感器最新进展。</p>
+            </a>
+        </div>
+    </section>
+
+    <section class="dashboard-section" id="dashboard">
+        <h2 class="section-title">科研成果与签约实力指标</h2>
+        <div class="stats-grid">
+            <div class="stat-card" v-for="(stat, i) in stats" :key="i">
+                <div class="stat-number">{{ Math.floor(stat.current) }}{{ stat.unit }}</div>
+                <div style="color:#4a5e78; font-size:0.92rem; font-weight:700; letter-spacing: 0.5px;">{{ stat.label }}</div>
+            </div>
+        </div>
+    </section>
+
+    <footer><p>DATA TELEMETRY PORTAL // &copy; 2026 工学院. 内蒙古大学工业智造与现代工程管理联合体系. 保留所有权利.</p></footer>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+    const { createApp, reactive, onMounted } = Vue;
+    createApp({
+        setup() {
+            const collegeData = reactive({ title: "工学院" });
+            const physicsBalls = reactive([
+                { text: '柔性自适应智造总成', icon: 'fas fa-cogs', x: 60, y: 70, vx: 1.4, vy: 1.6, url: 'https://www.sciencedirect.com/topics/engineering/flexible-manufacturing-system' },
+                { text: '现代特高压变流输电', icon: 'fas fa-bolt', x: 280, y: 180, vx: -1.7, vy: 1.3, url: 'https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=5165411' },
+                { text: '全生命期工业孪生', icon: 'fas fa-cubes', x: 520, y: 90, vx: 1.8, vy: -1.1, url: 'https://www.engineeringvillage.com/' },
+                { text: '非线性液压伺服传动', icon: 'fas fa-oil-can', x: 740, y: 230, vx: -1.2, vy: -1.6, url: 'https://www.asme.org/publications-submissions/journals/journal-of-dynamic-systems-measurement-and-control' },
+                { text: '多自由度空间工业双臂', icon: 'fas fa-robot', x: 180, y: 320, vx: 1.3, vy: -1.4, url: 'https://www.sciencedirect.com/journal/robotics-and-computer-integrated-manufacturing' },
+                { text: '低碳装配式结构基础', icon: 'fas fa-building', x: 600, y: 300, vx: -1.6, vy: 1.2, url: 'https://www.asce.org/' }
+            ]);
+            const departments = reactive([
+                { name: '机械设计制造及其自动化', icon: 'fas fa-wrench', expanded: false, summary: '国家首批特色硬核专业，专注于超精密复杂机电一体化总成与拓扑结构系统调优。', details: '深度培养面向国防科技、航空航天第一线从事多轴数控联动精密加工、液压电控流体拓扑结构解构、工业级边缘计算中枢及高端机器人整机结构开发与全生命期运行管理的顶尖复合型总工程师人才。', courses: ['工程制图与精密CAD', '非线性材料力学', '机械优化设计学', '闭环伺服传动调优', '工程热力学仿真'], career: '国家超重装研发中心、航空航天制造工程设计院、高端机电项目工程总师。' },
+                { name: '机器人工程', icon: 'fas fa-robot', expanded: false, summary: '前沿极客交叉学科。深度横跨机械工程学、精密电子电路算法与机器视觉拓扑感知。', details: '重点主攻特种机器人高维运动学规划、全闭环多传感器神经网络融合、仿生外骨骼关节协同控制、无人机群体编队算法及ROS工业级操作系统内核级开发应用。', courses: ['多维空间运动学', '传感器神经网络融合', 'ROS内核及驱动开发', '高性能微控制器嵌入式', '机器人控制理论'], career: '智能人形机器人算法架构师、自动驾驶控制系统总负责人、高能智慧物流总指挥官。' },
+                { name: '电气工程及其自动化', icon: 'fas fa-plug', expanded: false, summary: '能源网架中枢大国命脉。聚焦于百万伏特特高压安全输电与现代储能变流电力电子设备。', details: '深度探索未来大型微电网技术稳定态拓扑、风光核多能互补智慧电网调度保护系统开发、新能源车高性能电机驱动逆变控制以及现代化无损电能传输机制。', courses: ['复杂电路矩阵分析', '现代模拟/数字信号芯片', '电机学及流场拓扑', '高频电力电子变流', '智能微电网导论'], career: '国家核心能源系统研究院、大型电气自动化设备跨国企业、新能源车三电总架构师。' }
+            ]);
+            const stats = reactive([
+                { label: '领军学术与重工产业中坚英才', target: 3680, current: 0, unit: ' 人+' },
+                { label: '大国重器工程与重点技术成果奖', target: 96, current: 0, unit: ' 项' },
+                { label: '重工巨头战略级产学研联合基地', target: 54, current: 0, unit: ' 家' },
+                { label: '现代精密实验室基地总面积', target: 8650, current: 0, unit: ' ㎡' }
+            ]);
+
+            let activeDragIdx = null; let startMousePos = { x: 0, y: 0 }; let dragOffset = { x: 0, y: 0 }; let isDragged = false;
+            const startDrag = (e, idx) => {
+                activeDragIdx = idx; physicsBalls[idx].vx = 0; physicsBalls[idx].vy = 0; isDragged = false;
+                startMousePos.x = e.clientX; startMousePos.y = e.clientY;
+                dragOffset.x = e.clientX - physicsBalls[idx].x; dragOffset.y = e.clientY - physicsBalls[idx].y;
+                document.addEventListener('mousemove', handleDrag); document.addEventListener('mouseup', stopDrag);
+            };
+            const handleDrag = (e) => {
+                if (activeDragIdx !== null) {
+                    physicsBalls[activeDragIdx].x = e.clientX - dragOffset.x; physicsBalls[activeDragIdx].y = e.clientY - dragOffset.y;
+                    if (Math.hypot(e.clientX - startMousePos.x, e.clientY - startMousePos.y) > 5) isDragged = true;
+                }
+            };
+            const stopDrag = () => {
+                if (activeDragIdx !== null) {
+                    if (!isDragged) window.open(physicsBalls[activeDragIdx].url, '_blank');
+                    else { physicsBalls[activeDragIdx].vx = (Math.random() - 0.5) * 4; physicsBalls[activeDragIdx].vy = (Math.random() - 0.5) * 4; }
+                }
+                activeDragIdx = null; document.removeEventListener('mousemove', handleDrag); document.removeEventListener('mouseup', stopDrag);
+            };
+            const updatePhysics = () => {
+                const box = document.getElementById('sandbox'); if (!box) return;
+                physicsBalls.forEach((ball, idx) => {
+                    if (idx === activeDragIdx) return;
+                    ball.x += ball.vx; ball.y += ball.vy;
+                    if (ball.x <= 10 || ball.x >= box.clientWidth - 175) ball.vx *= -1;
+                    if (ball.y <= 10 || ball.y >= box.clientHeight - 175) ball.vy *= -1;
+                });
+                requestAnimationFrame(updatePhysics);
+            };
+
+            onMounted(() => {
+                updatePhysics();
+                const obs = new IntersectionObserver((el) => { if (el[0].isIntersecting) { stats.forEach(s => gsap.to(s, { current: s.target, duration: 2.2 })); } }, { threshold: 0.1 });
+                obs.observe(document.getElementById('dashboard'));
+                initIndustrialMatrix();
+            });
+            return { collegeData, physicsBalls, departments, stats, startDrag };
+        }
+    }).mount('#app');
+
+    // ⚡ 专属重工业美学：精调 CAD 测绘图纸与应力场连线引擎
+    function initIndustrialMatrix() {
+        const canvas = document.getElementById('particle-canvas'), ctx = canvas.getContext('2d');
+        let pts = [], mouse = { x: null, y: null, radius: 190 };
+        const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+        window.addEventListener('resize', resize); window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; }); resize();
+
+        class BlueprintNode {
+            constructor() {
+                this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height;
+                this.bx = this.x; this.by = this.y;
+                this.size = Math.random()*1.5 + 2;
+                this.speed = (Math.random()*10)+10;
+                this.angle = Math.random() * Math.PI * 2;
+                this.angularSpeed = (Math.random() - 0.5) * 0.02;
+            }
+            draw() {
+                // 渲染主测绘节点
+                ctx.fillStyle = 'rgba(255, 69, 0, 0.65)';
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
+
+                // ⚙️ 核心美学创新点：在特定节点周围渲染旋转的力矩齿轮环/罗盘，彻底区别于信息学院！
+                if(this.speed > 18) {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    ctx.strokeStyle = 'rgba(0, 210, 255, 0.12)';
+                    ctx.lineWidth = 1;
+                    // 画精密外环
+                    ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI*2); ctx.stroke();
+                    // 画十字准星
+                    ctx.strokeStyle = 'rgba(255, 69, 0, 0.18)';
+                    ctx.beginPath(); ctx.moveTo(-22, 0); ctx.lineTo(22, 0); ctx.moveTo(0, -22); ctx.lineTo(0, 22); ctx.stroke();
+                    ctx.restore();
+                    this.angle += this.angularSpeed;
+                }
+            }
+            update() {
+                this.bx += Math.sin(Date.now()*0.0005 + this.speed)*0.06;
+                if (mouse.x != null && mouse.y != null) {
+                    let dx = mouse.x - this.x, dy = mouse.y - this.y, dist = Math.hypot(dx, dy);
+                    if (dist < mouse.radius) {
+                        let force = (mouse.radius - dist) / mouse.radius;
+                        // 产生应力场磁力吸附形变
+                        this.x += (dx / dist) * force * this.speed * 0.25;
+                        this.y += (dy / dist) * force * this.speed * 0.25;
+                        return;
+                    }
+                }
+                this.x += (this.bx - this.x)*0.04; this.y += (this.by - this.y)*0.04;
+            }
+        }
+
+        for(let i=0;i<85;i++) pts.push(new BlueprintNode());
+
+        function loop() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+
+            // 💎 底衬：精密 CAD 刻度对齐网格线线框背景
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.008)'; ctx.lineWidth = 0.8;
+            for(let g = 0; g < canvas.width; g += 70) { ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, canvas.height); ctx.stroke(); }
+            for(let g = 0; g < canvas.height; g += 70) { ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(canvas.width, g); ctx.stroke(); }
+
+            // 结构框架受力分支连线
+            for(let a=0; a<pts.length; a++){
+                for(let b=a+1; b<pts.length; b++){
+                    let dist = Math.hypot(pts[a].x - pts[b].x, pts[a].y - pts[b].y);
+                    if(dist < 125) {
+                        // 动态根据鼠标应力改变线条质感（靠近鼠标变冷轨蓝，远离呈淬火橙）
+                        let nearMouse = false;
+                        if(mouse.x != null && Math.hypot(mouse.x - pts[a].x, mouse.y - pts[a].y) < mouse.radius) {
+                            nearMouse = true;
+                        }
+                        ctx.strokeStyle = nearMouse ? `rgba(0, 210, 255, ${0.55 - dist/125})` : `rgba(255, 69, 0, ${0.45 - dist/125})`;
+                        ctx.lineWidth = nearMouse ? 1.2 : 0.8;
+                        ctx.beginPath(); ctx.moveTo(pts[a].x, pts[a].y); ctx.lineTo(pts[b].x, pts[b].y); ctx.stroke();
+                    }
+                }
+            }
+            pts.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(loop);
+        }
+        loop();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教师聘任事务管理</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: #ffffff;
+      color: #334155;
+      padding: 20px;
+    }
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .search-group { display: flex; gap: 10px; }
+
+    input, select {
+      padding: 9px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #334155;
+      outline: none;
+      transition: all 0.25s;
+    }
+    input:focus, select:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    button {
+      padding: 9px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-indigo { background-color: #6366f1; color: white; }
+    .btn-indigo:hover { background-color: #4f46e5; }
+    .btn-outline { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .btn-outline:hover { background-color: #e2e8f0; }
+    .btn-danger { background-color: #f43f5e; color: white; padding: 5px 10px; font-size: 12px; }
+    .btn-danger:hover { background-color: #e11d48; }
+    .btn-edit { background-color: #10b981; color: white; padding: 5px 10px; font-size: 12px; margin-right: 6px; }
+    .btn-edit:hover { background-color: #059669; }
+
+    .table-wrapper { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 14px; font-size: 14px; border-bottom: 1px solid #e2e8f0; }
+    th { background-color: #f8fafc; color: #64748b; font-weight: 600; }
+    tr:hover { background-color: #f8fafc; }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 2000;
+    }
+    .modal-body {
+      background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 480px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+    .modal-title { font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 20px; }
+    .form-row { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .form-row label { font-size: 13px; font-weight: 500; color: #475569; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+
+    .pop-enter-active, .pop-leave-active { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .pop-enter, .pop-leave-to { opacity: 0; }
+    .pop-enter .modal-body, .pop-leave-to .modal-body { transform: scale(0.92) translateY(-15px); }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="action-bar">
+    <button class="btn-indigo" @click="openModal(false)">➕ 聘任新教师</button>
+    <div class="search-group">
+      <input type="text" v-model.trim="searchId" placeholder="输入教工编号精确检索">
+      <button class="btn-indigo" @click="handleSearch">检索</button>
+      <button class="btn-outline" @click="resetSearch">清空</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+      <tr>
+        <th>教师编号</th>
+        <th>教师姓名</th>
+        <th>核心授课课程</th>
+        <th>归属教学学院</th>
+        <th style="text-align: center;">档案维系</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr v-for="t in teachers" :key="t.teacherId">
+        <td>{{ t.teacherId }}</td>
+        <td>{{ t.teachername }}</td>
+        <td>{{ t.teachercourse }}</td>
+        <td>{{ t.collegename }}</td>
+        <td style="text-align: center;">
+          <button class="btn-edit" @click="openModal(true, t)">编辑</button>
+          <button class="btn-danger" @click="handleDelete(t.teacherId)">解聘/删除</button>
+        </td>
+      </tr>
+      <tr v-if="teachers.length === 0">
+        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px;">👨‍🏫 暂无任何相关的高校师资档案数据</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <transition name="pop">
+    <div class="modal-overlay" v-if="visible">
+      <div class="modal-body">
+        <div class="modal-title">{{ isEdit ? '校正教师业务档案' : '新进教师资质录入' }}</div>
+
+        <div class="form-row">
+          <label>工号 (教师编号)</label>
+          <input type="text" v-model="form.teacherId" :disabled="isEdit" placeholder="请输入教师工号">
+        </div>
+        <div class="form-row">
+          <label>真实姓名</label>
+          <input type="text" v-model="form.teachername" placeholder="请输入姓名">
+        </div>
+        <div class="form-row">
+          <label>核心主讲课程</label>
+          <input type="text" v-model="form.teachercourse" placeholder="例如: 高等数学、数据结构">
+        </div>
+        <div class="form-row">
+          <label>下属任教学院</label>
+          <select v-model="form.collegename">
+            <option value="">-- 请点选关联院系 --</option>
+            <option v-for="c in collegeList" :key="c" :value="c">{{ c }}</option>
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-outline" @click="visible = false">放弃修改</button>
+          <button class="btn-indigo" @click="handleSubmit">保存同步</button>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      API_BASE: 'http://localhost:8080/teachers',
+      teachers: [],
+      searchId: '',
+      visible: false,
+      isEdit: false,
+      form: { teacherId: '', teachername: '', teachercourse: '', collegename: '' },
+      collegeList: ['信息工程学院', '外国语学院', '马克思学院', '文学院', '艺术学院', '工学院']
+    },
+    computed: {
+      token() { return localStorage.getItem('jwt_token'); }
+    },
+    methods: {
+      getHeaders() { return { 'Authorization': 'Bearer ' + this.token, 'Content-Type': 'application/json' }; },
+      loadTeachers() {
+        axios.get(`${this.API_BASE}/list`, { headers: this.getHeaders() })
+                .then(res => this.teachers = (res.data && res.data.data) ? res.data.data : [])
+                .catch(() => alert('未获取到有效令牌或接口崩溃'));
+      },
+      openModal(editMode, target = null) {
+        this.isEdit = editMode;
+        this.form = editMode ? { ...target } : { teacherId: '', teachername: '', teachercourse: '', collegename: '' };
+        this.visible = true;
+      },
+      handleSubmit() {
+        if (!this.form.teacherId || !this.form.teachername || !this.form.teachercourse || !this.form.collegename) {
+          alert('请务必完善每一项教研档案信息'); return;
+        }
+
+        if (this.isEdit) {
+          axios.put(`${this.API_BASE}/update/${this.form.teacherId}`, this.form, { headers: this.getHeaders() })
+                  .then(() => { this.visible = false; this.loadTeachers(); });
+        } else {
+          axios.post(`${this.API_BASE}/create`, this.form, { headers: this.getHeaders() })
+                  .then(() => { this.visible = false; this.loadTeachers(); });
+        }
+      },
+      handleDelete(id) {
+        if (!confirm('解除聘任后数据将不可逆恢复，确认删除该教师吗？')) return;
+        axios.delete(`${this.API_BASE}/delete/${id}`, { headers: this.getHeaders() })
+                .then(() => this.loadTeachers());
+      },
+      handleSearch() {
+        if (!this.searchId) { this.loadTeachers(); return; }
+        axios.get(`${this.API_BASE}/detail/${this.searchId}`, { headers: this.getHeaders() })
+                .then(res => this.teachers = (res.data && res.data.data) ? [res.data.data] : [])
+                .catch(() => this.teachers = []);
+      },
+      resetSearch() { this.searchId = ''; this.loadTeachers(); }
+    },
+    mounted() { this.loadTeachers(); }
+  });
+</script>
+</body>
+</html>

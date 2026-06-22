@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>账号注册</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 650px;
+      padding: 40px;
+      animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 30px;
+    }
+    h1 { color: #1e293b; font-size: 24px; font-weight: 600; }
+    .subtitle { color: #64748b; font-size: 14px; margin-top: 4px; }
+    .link { color: #3b82f6; text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+    .link:hover { color: #1d4ed8; text-decoration: underline; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    @media (max-width: 500px) { .grid { grid-template-columns: 1fr; gap: 15px; } }
+
+    .field { display: flex; flex-direction: column; }
+    .label { font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px; }
+    .input {
+      padding: 10px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+    }
+    .hint { color: #94a3b8; font-size: 11px; margin-top: 4px; }
+
+    .error-msg {
+      background-color: #fef2f2;
+      border-left: 4px solid #ef4444;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+    .btn {
+      background-color: #3b82f6;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+    .btn:hover { background-color: #2563eb; }
+    .muted { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 12px; }
+
+    /* Vue过流动效 */
+    .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+    .fade-enter, .fade-leave-to { opacity: 0; }
+  </style>
+</head>
+<body>
+<div id="app" class="card">
+  <div class="header">
+    <div>
+      <h1>创建你的新账号</h1>
+      <p class="subtitle">请填写下方真实的基础信息完成注册</p>
+    </div>
+    <a class="link" href="login.html">已有账号？去登录</a>
+  </div>
+
+  <form @submit.prevent="handleRegister">
+    <div class="grid">
+      <div class="field">
+        <label class="label">展示昵称</label>
+        <input class="input" v-model.trim="form.nickname" type="text" placeholder="例如: 张三" />
+      </div>
+      <div class="field">
+        <label class="label">登录账号</label>
+        <input class="input" v-model.trim="form.userId" type="text" placeholder="由字母/数字/下划线组成" />
+        <div class="hint">3-20 位，用于往后登录校验</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label class="label">安全邮箱</label>
+        <input class="input" v-model.trim="form.email" type="email" placeholder="username@example.com" />
+      </div>
+      <div class="field">
+        <label class="label">手机号码（可选）</label>
+        <input class="input" v-model.trim="form.phone" type="tel" placeholder="11位大陆手机号" />
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label class="label">设置密码</label>
+        <input class="input" v-model="form.password" type="password" placeholder="不得少于6位" />
+      </div>
+      <div class="field">
+        <label class="label">确认密码</label>
+        <input class="input" v-model="form.confirmPassword" type="password" placeholder="再次输入密码" />
+      </div>
+    </div>
+
+    <transition name="fade">
+      <div class="error-msg" v-if="errorMsg">⚠️ {{ errorMsg }}</div>
+    </transition>
+
+    <button type="submit" class="btn">立即注册</button>
+    <p class="muted">注册即代表您完全知晓并同意服务条款与信息保护政策</p>
+  </form>
+</div>
+
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    data() {
+      return {
+        form: { userId: '', nickname: '', email: '', phone: '', password: '', confirmPassword: '' },
+        errorMsg: ''
+      }
+    },
+    methods: {
+      validate() {
+        if (!this.form.nickname) return '请输入展示昵称';
+        if (!/^[A-Za-z0-9_]{3,20}$/.test(this.form.userId)) return '用户名必须为3-20位字母、数字或下划线';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) return '电子邮箱格式不规范';
+        if (this.form.phone && !/^1[3-9]\d{9}$/.test(this.form.phone)) return '大陆手机号格式不正确';
+        if (!this.form.password || this.form.password.length < 6) return '密码安全级别不够，至少需要6位';
+        if (this.form.password !== this.form.confirmPassword) return '两次输入的密码不匹配';
+        return null;
+      },
+      handleRegister() {
+        this.errorMsg = '';
+        const errMsg = this.validate();
+        if (errMsg) { this.errorMsg = errMsg; return; }
+
+        const submitData = {
+          userId: this.form.userId,
+          nickname: this.form.nickname,
+          email: this.form.email,
+          phone: this.form.phone || null,
+          password: this.form.password
+        };
+
+        axios.post('http://localhost:8080/users/creatUser', submitData)
+                .then(res => {
+                  alert('注册成功！');
+                  localStorage.setItem('jwt_token', res.data.token || '');
+                  localStorage.setItem('username', submitData.userId);
+                  window.location.href = 'login.html';
+                })
+                .catch(err => {
+                  if (err.response && err.response.status === 400) {
+                    this.errorMsg = '注册失败：该账户或邮箱在系统中已被占用';
+                  } else {
+                    this.errorMsg = '网络或服务器响应异常，请稍后再试';
+                  }
+                });
+      }
+    }
+  });
+</script>
+</body>
+</html>

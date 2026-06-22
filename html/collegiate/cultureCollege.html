@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文学院 - 人文历史画卷</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior: smooth; }
+    body { font-family: "Georgia", "Pinsheng", "Microsoft YaHei", serif; background: #faf6f0 !important; color: #2d2722; overflow-x: hidden; }
+    #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0.15; }
+    .container { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; padding: 80px 50px 80px 20px; }
+
+    /* 侧边栏：国风竹木卷轴风 */
+    .sidebar-dock {
+      position: fixed; right: 25px; top: 50%; transform: translateY(-50%);
+      background: rgba(244, 237, 225, 0.9); border: 2px solid #7c2d12;
+      padding: 22px 10px; border-radius: 6px; display: flex; flex-direction: column; gap: 20px; z-index: 999;
+      box-shadow: 5px 5px 20px rgba(124, 45, 18, 0.15); transition: all 0.3s;
+    }
+    .dock-item {
+      width: 44px; height: 44px; border-radius: 4px; background: rgba(124, 45, 18, 0.05);
+      display: flex; align-items: center; justify-content: center; color: #7c2d12;
+      text-decoration: none; font-size: 1.2rem; transition: all 0.3s; position: relative;
+    }
+    .dock-item span {
+      position: absolute; right: 60px; background: #7c2d12; color: #faf6f0;
+      padding: 6px 14px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;
+      white-space: nowrap; opacity: 0; pointer-events: none; transform: translateX(10px); transition: all 0.3s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .dock-item:hover span { opacity: 1; transform: translateX(0); }
+    .dock-item:hover { background: #7c2d12; color: #faf6f0; transform: scale(1.08); }
+
+    /* 核心返回全局按钮：极高显性朱砂脉冲 */
+    .dock-item.global-btn {
+      background: linear-gradient(135deg, #c2410c, #7c2d12); color: #ffffff !important;
+      box-shadow: 0 0 15px rgba(194, 65, 12, 0.6); animation: cultureGlow 2s infinite;
+    }
+    .dock-item.global-btn span { background: #451a03; color: #f97316; border: 1px solid #f97316; }
+    @keyframes cultureGlow {
+      0% { box-shadow: 0 0 10px #c2410c; transform: scale(1); }
+      50% { box-shadow: 0 0 25px #ea580c; transform: scale(1.06); }
+      100% { box-shadow: 0 0 10px #c2410c; transform: scale(1); }
+    }
+
+    .header-title { text-align: center; font-size: 3.8rem; font-weight: 500; margin-bottom: 50px; color: #4c1d95; background: linear-gradient(to right, #451a03, #7c2d12); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 4px; }
+    .intro-card { background: rgba(255, 255, 255, 0.75); padding: 45px; border-radius: 12px; border-left: 6px solid #7c2d12; border-right: 1px solid #e7e5e4; border-top: 1px solid #e7e5e4; border-bottom: 1px solid #e7e5e4; margin-bottom: 50px; line-height: 1.9; font-size: 1.15rem; text-align: justify; backdrop-filter: blur(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+    .section-title { font-size: 2.4rem; margin-bottom: 35px; color: #7c2d12; font-weight: 500; position: relative; display: inline-block; }
+    .section-title::after { content:''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 60px; height: 2px; background: #7c2d12; }
+
+    /* 专业板块 */
+    .dept-item-box { background: #ffffff; border-radius: 8px; border: 1px solid #e7e5e4; padding: 35px; margin-bottom: 25px; transition: all 0.3s; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.01); }
+    .dept-item-box:hover { box-shadow: 0 10px 25px rgba(124,45,18,0.06); border-color: #7c2d12; }
+    .dept-top { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; color: #7c2d12; font-size: 1.4rem; }
+    .dept-det { font-size: 1rem; line-height: 1.8; color: #4a443f; padding-top: 18px; border-top: 1px dashed #cbd5e1; animation: slideDown 0.3s ease; }
+    .dept-det ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    .dept-det li { background: #faf6f0; border: 1px solid #e7e5e4; padding: 5px 12px; border-radius: 4px; font-size: 0.9rem; color: #c2410c; }
+
+    /* 设施展示 */
+    .architecture-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 40px; margin-top: 40px; margin-bottom: 80px; }
+    .building-card { position: relative; border-radius: 12px; overflow: hidden; height: 400px; box-shadow: 0 8px 25px rgba(0,0,0,0.04); cursor: pointer; border: 1px solid #e7e5e4; }
+    .building-img { width: 100%; height: 100%; background-size: cover; background-position: center; transition: transform 0.6s ease; }
+    .building-info { position: absolute; bottom: -100%; left: 0; width: 100%; padding: 30px; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(15px); border-top: 2px solid #7c2d12; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
+    .building-card:hover .building-img { transform: scale(1.05); }
+    .building-card:hover .building-info { bottom: 0; }
+    .building-info h3 { font-size: 1.35rem; color: #7c2d12; margin-bottom: 10px; }
+
+    /* 扩充：公共学术跳转向导 */
+    .academic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; margin-bottom: 80px; }
+    .academic-card { background: #ffffff; border: 1px solid #e7e5e4; border-radius: 12px; padding: 30px; text-align: center; text-decoration: none; color: inherit; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.01); }
+    .academic-card:hover { border-color: #7c2d12; background: #faf6f0; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(124,45,18,0.1); }
+    .academic-card i { font-size: 2.3rem; color: #7c2d12; margin-bottom: 15px; }
+
+    /* 卷轴编年史 */
+    .horizontal-scroll { display: flex; overflow-x: auto; padding: 40px 20px; gap: 60px; scroll-behavior: smooth; border-bottom: 2px solid #7c2d12; }
+    .horizontal-scroll::-webkit-scrollbar { height: 6px; }
+    .horizontal-scroll::-webkit-scrollbar-thumb { background: #7c2d12; border-radius: 3px; }
+    .timeline-node { flex: 0 0 300px; text-align: left; }
+    .year-indicator { font-size: 3.5rem; font-weight: 300; color: #c2410c; display: inline-block; transition: transform 0.2s ease; transform-origin: left bottom; }
+
+    /* 数据成果看板 */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px; margin-bottom: 80px; }
+    .stat-card { background: #ffffff; border: 1px solid #e7e5e4; padding: 40px 30px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.01); }
+    .stat-number { font-size: 3.8rem; font-weight: 700; color: #7c2d12; margin-bottom: 8px; }
+
+    @keyframes slideDown { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    footer { text-align: center; padding: 60px 0 40px; color: #78716c; font-size: 0.95rem; border-top: 1px solid #e7e5e4; }
+  </style>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+
+<nav class="sidebar-dock">
+  <a href="../index.html" class="dock-item global-btn" title="返回全局门户"><i class="fas fa-globe"></i><span>返回全局门户</span></a>
+  <a href="#intro" class="dock-item" title="学院概况"><i class="fas fa-university"></i><span>学院概况</span></a>
+  <a href="#majors" class="dock-item" title="专业体系"><i class="fas fa-graduation-cap"></i><span>专业体系</span></a>
+  <a href="#facilities" class="dock-item" title="藏书阅览"><i class="fas fa-book-reader"></i><span>藏书阅览</span></a>
+  <a href="#academic" class="dock-item" title="古典学术向导"><i class="fas fa-atlas"></i><span>学术资源</span></a>
+  <a href="#timeline" class="dock-item" title="发展长卷"><i class="fas fa-scroll"></i><span>发展长卷</span></a>
+  <a href="#dashboard" class="dock-item" title="教研成果"><i class="fas fa-medal"></i><span>教研成果看板</span></a>
+</nav>
+
+<div id="app" class="container">
+  <h1 class="header-title" id="intro">{{ collegeData.name }}</h1>
+
+  <div class="intro-card">
+    <p>文学院成立于1956年，是学校底蕴最深厚、历史最悠久的基石学院之一。学院始终坚守“传承华夏文脉，弘扬人文风骨”的学界初心，融汇传统国学训诂、中国古代/现当代文学精粹以及新媒体时代的网络跨界表达。学院名师荟萃，学术积淀雄厚，在大规模华语现代语料库构建、古典文献发掘及跨文体创意写作中位列前沿，致力于培养兼具家国情怀与扎实文字笔力的高级学者与社会文创栋梁。</p>
+  </div>
+
+  <div style="margin-bottom: 60px; text-align: center;" id="majors">
+    <h2 class="section-title">风雅颂·经典专业架构</h2>
+    <div v-for="(d, i) in departments" :key="i" class="dept-item-box" @click="d.open = !d.open">
+      <div class="dept-top"><i :class="d.icon"></i><h3>{{ d.title }}</h3></div>
+      <p style="color:#57534e; font-size:1.05rem; text-align:left;">{{ d.summary }}</p>
+      <div v-if="d.open" class="dept-det" style="text-align: left;">
+        <p>{{ d.details }}</p>
+        <h4 style="color:#7c2d12; margin-top:12px; font-size:1rem;"><i class="fas fa-feather-alt"></i> 典藏教研课程</h4>
+        <ul><li v-for="c in d.courses">{{ c }}</li></ul>
+        <p style="font-size:0.95rem; color:#c2410c; margin-top:12px;"><strong><i class="fas fa-map-marked-alt"></i> 社会文化去向：</strong>{{ d.career }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 60px;" id="facilities">
+    <h2 class="section-title" style="display: block; text-align: center;">书香浸润·教学设施基地</h2>
+    <div class="architecture-grid">
+      <div class="building-card" v-for="(b, i) in facilities" :key="i">
+        <div class="building-img" :style="{ backgroundImage: 'url(' + b.img + ')' }"></div>
+        <div class="building-info"><h3>{{ b.title }}</h3><p style="color:#57534e;">{{ b.desc }}</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 60px;" id="academic">
+    <h2 class="section-title" style="display: block; text-align: center;">古典国学与人文前沿公共向导</h2>
+    <div class="academic-grid">
+      <a href="https://www.cnki.net" target="_blank" class="academic-card">
+        <i class="fas fa-search"></i>
+        <h3>中国知网 (CNKI)</h3>
+        <p>国家级权威学术文献总库，深入检索传统文化、现代文学与汉语言演进大势。</p>
+      </a>
+      <a href="https://www.nlc.cn" target="_blank" class="academic-card">
+        <i class="fas fa-landmark"></i>
+        <h3>中国国家图书馆</h3>
+        <p>华夏藏书总枢纽，提供大规模免费数字古籍特藏、地方志与珍本微缩影像资源。</p>
+      </a>
+      <a href="https://www.gushiwen.cn" target="_blank" class="academic-card">
+        <i class="fas fa-pen-fancy"></i>
+        <h3>古典文献数字化网</h3>
+        <p>集成历代正史、全唐诗、全宋词等多阶大型数字化文史校勘与权威注疏库。</p>
+      </a>
+      <a href="https://scholar.google.com" target="_blank" class="academic-card">
+        <i class="fas fa-graduation-cap"></i>
+        <h3>Google Scholar</h3>
+        <p>全球公共学术检索网络，纵览国际汉学、东亚文化交叉研究以及海外前沿思潮。</p>
+      </a>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 60px;" id="timeline">
+    <h2 class="section-title" style="display: block; text-align: center;">文脉绵延·学院发展长卷</h2>
+    <div class="horizontal-scroll" id="timeline-container" @scroll="scrollTimeline">
+      <div class="timeline-node" v-for="(t, idx) in timeline" :key="idx">
+        <span class="year-indicator">{{ t.year }}</span>
+        <p style="color:#57534e; margin-top:15px; line-height:1.6;">{{ t.event }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:60px;" id="dashboard">
+    <h2 class="section-title" style="display: block; text-align: center;">教研成果与底蕴指标看板</h2>
+    <div class="stats-grid">
+      <div class="stat-card" v-for="(stat, i) in stats" :key="i">
+        <div class="stat-number">{{ Math.floor(stat.current) }}{{ stat.unit }}</div>
+        <div style="color:#6b6661; font-size:1.05rem;">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+
+  <footer><p>&copy; 2026 文学院. 内蒙古大学华夏文脉传承与现代语料教研大类项目. 保留所有权利.</p></footer>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+  const { createApp, onMounted, reactive } = Vue;
+  createApp({
+    setup() {
+      const collegeData = reactive({ name: "文学院" });
+      const departments = reactive([
+        { title: '汉语言文学', icon: 'fas fa-book', open: false, summary: '国家级王牌学科，纵深跨越古代汉语训诂与近现代巨匠文学。', details: '系统钻研文字学、声韵学、西方文学批评方法论以及大型经典作家的思想原生态。', courses: ['古代汉语专题', '中国古代文学史长卷', '现代文学思潮流变', '训诂学与文献校勘'], career: '主流重点中学国文教师、党政机关特级秘书、出版集团资深策划主编、知名作家。' },
+        { title: '历史学', icon: 'fas fa-history', open: false, summary: '辨章学术，考镜源流。从甲骨断代到近现代全球外交格局。', details: '深入学习史学理论方法论、中国通史、世界古代及近现代史、考古发掘基础及地方志编纂。', courses: ['史学史方法论', '魏晋南北朝断代史', '世界现代地缘政治史', '古文字学与出土文献'], career: '国家文物博物馆馆员、历史地理研究所研究员、政策研究智库高端顾问、文化主理人。' },
+        { title: '网络与新媒体文学', icon: 'fas fa-wifi', open: false, summary: '聚焦智能化时代的网文叙事、新媒体大爆款编剧与多文体创意写作。', details: '钻研社交网络文案心理学、流媒体剧本微短剧创作、数字出版前沿技术以及智能写作辅助调优。', courses: ['新媒体创意写作', '爆款剧本视听语言', '数字媒介营销策划', '智能AI语料交互'], career: '顶尖互联网大厂内容架构师、金牌网文签约作家、流媒体独家签约编剧、创意新媒体总监。' }
+      ]);
+      const facilities = reactive([
+        { title: "古籍特藏阅览中心", desc: "馆藏丰富的人文社科类图书，拥有10万册极其珍贵的孤本、清刻本精装古籍特藏数据库资料。", img: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80" },
+        { title: "现代文创智慧孵化大厅", desc: "配备多维立体音频录制、数字排版打样及创意文案协同工作站的极客空间。", img: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" }
+      ]);
+      const timeline = reactive([
+        { year: "1956", event: "文学院始建，确立核心通识底蕴，成为建校最早的文脉基石。" },
+        { year: "1988", event: "开辟硕士、博士一级学科点，扩增教研纵深范围。" },
+        { year: "2026", event: "深度融合多维智慧语料与大语言模型文学工程，全面升级大教研教学阵线。" }
+      ]);
+      const stats = reactive([
+        { label: '馆藏孤本及线装古籍', target: 12000, current: 0, unit: ' 册+' },
+        { label: '教研核心学术著作', target: 340, current: 0, unit: ' 部' },
+        { label: '文坛名家及大奖获得者', target: 28, current: 0, unit: ' 人' },
+        { label: '省部级文史研究基地', target: 6, current: 0, unit: ' 个' }
+      ]);
+
+      const scrollTimeline = () => {
+        const container = document.getElementById('timeline-container'), nodes = container.getElementsByClassName('year-indicator');
+        const center = container.getBoundingClientRect().left + container.clientWidth / 2;
+        Array.from(nodes).forEach(n => {
+          const dist = Math.abs(center - (n.getBoundingClientRect().left + n.getBoundingClientRect().width / 2));
+          if (dist < container.clientWidth / 2) {
+            n.style.transform = `scale(${1 + (1 - dist / (container.clientWidth / 2)) * 0.35})`;
+          } else { n.style.transform = `scale(1)`; }
+        });
+      };
+
+      onMounted(() => {
+        const obs = new IntersectionObserver((el) => {
+          if (el[0].isIntersecting) { stats.forEach(s => gsap.to(s, { current: s.target, duration: 2.2 })); }
+        }, { threshold: 0.1 });
+        obs.observe(document.getElementById('dashboard'));
+        initInkCanvas(); setTimeout(scrollTimeline, 200);
+      });
+      return { collegeData, departments, facilities, timeline, scrollTimeline, stats };
+    }
+  }).mount('#app');
+
+  function initInkCanvas() {
+    const canvas = document.getElementById('particle-canvas'), ctx = canvas.getContext('2d');
+    let nodes = [];
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.addEventListener('resize', resize); resize();
+
+    class InkNode {
+      constructor() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.size = Math.random()*40 + 20; this.vX = (Math.random()-0.5)*0.5; this.vY = (Math.random()-0.5)*0.5; this.alpha = Math.random()*0.15 + 0.05; }
+      draw() {
+        ctx.fillStyle = `rgba(124, 45, 18, ${this.alpha})`;
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
+      }
+      update() {
+        this.x += this.vX; this.y += this.vY;
+        if(this.x < -100 || this.x > canvas.width+100) this.vX *= -1;
+        if(this.y < -100 || this.y > canvas.height+100) this.vY *= -1;
+      }
+    }
+    for(let i=0; i<25; i++) nodes.push(new InkNode());
+    function loop() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      nodes.forEach(n => { n.update(); n.draw(); }); requestAnimationFrame(loop);
+    }
+    loop();
+  }
+</script>
+</body>
+</html>
